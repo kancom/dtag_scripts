@@ -1,0 +1,53 @@
+//rsync -avz --progress /media/FA3EF02A3EEFDD9F/Users/Андрей/Documents/Tekelec/temp/netboss/deploy/ root@10.64.4.13:/opt/E5-MS/commandManager/scripts/root/default/
+
+//imports
+import java.text.SimpleDateFormat;
+import java.util.Date;
+String WD = "/Tekelec/WebNMS/commandManagerScripts/root/default/";
+addClassPath(WD);
+importCommands("/lib");
+
+//vars
+String EagleCmd;
+SimpleDateFormat TimeLimitParser = new SimpleDateFormat("HH:mm");
+SimpleDateFormat Time4Cmd = new SimpleDateFormat("HHmm");
+SimpleDateFormat Date4Cmd = new SimpleDateFormat("yyMMdd");
+
+//consts
+float MaxOffset = Float.MAX_VALUE; //(in seconds) put 'Float.MAX_VALUE' to ignore ntp sync check;
+Date TimeLimit = TimeLimitParser.parse("23:58"); //hh:mm
+//=============Please make it actual===========
+String NAME = "bulk_time_setting";
+//=============^^^^^^^^^^^^^^^^^===============
+
+//main
+Script4time = EagleIface(NAME);
+Script4time.logMsg("Started");
+String shellcmd = Script4time.myexec(new String[] {"/bin/bash", "-c", "set -o pipefail;ntpq -p 2> /dev/null | grep '*' | awk '{print $9}' || echo 1000"});
+float offset = Float.valueOf(shellcmd);
+if (offset > MaxOffset) {
+  Script4time.pushAlarm(Script4time.MINOR, "ntp is not synced: offset > "+MaxOffset + "sec.");
+  Stop();
+} else {
+  //Script4time.pushAlarm(Script4time.INFO, "ntp is synced: offset "+offset + "sec.");
+  Date now = new Date();
+  while (now.getSeconds()>0) {
+    Thread.sleep(900);
+    now = new Date();
+  }
+  EagleCmd = "set-time:time="+Time4Cmd.format(now)+":tz="+Script4time.myexec(new String[] {"date", "+%Z"});
+  if (! Script4time.sendCmd(EagleCmd, true)) {
+    Script4time.pushAlarm(Script4time.WARNING, EagleCmd + " command failed.");
+  }
+  now = new Date();
+  Date mCurTime = TimeLimitParser.parse(TimeLimitParser.format(now));
+  if (mCurTime.before(TimeLimit)) {
+    EagleCmd = "set-date:date="+Date4Cmd.format(now);
+    if (! Script4time.sendCmd(EagleCmd, true)) {
+      Script4time.pushAlarm(Script4time.WARNING, EagleCmd + " command failed.");
+    }
+  } else {
+    Script4time.pushAlarm(Script4time.WARNING, "Date set command unsuccessful: too close to "+TimeLimitParser.format(TimeLimit)+" try again later");
+  }
+}
+Script4time.logMsg("Completed");

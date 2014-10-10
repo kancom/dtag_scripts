@@ -1,0 +1,26 @@
+//imports
+String WD = "/Tekelec/WebNMS/commandManagerScripts/root/default/"; //full path with trailing slash/
+addClassPath(WD);
+importCommands("/lib");
+
+//consts
+//=========Please make it actual===========
+String NAME = "meas_archive";
+//=========^^^^^^^^^^^^^^^^^===============
+
+//main
+/*===================================================================
+|	THIS FUNCTION IS ALREADY IMPLEMENTED IN NEW E5-MS
+|	see 910-6752-001 pg. 85
+|All the measurement files in output directory (/var/E5-MS/measurement/csvoutput), which
+|are older than 'n' days, are archived in a compressed version (tar.bz2 format) and then the
+|original files is be removed. Here 'n' is the value of the parameter 'Days, directories older than is
+|archived' in tekelecMeasArchiveCleanupConfig.txt file placed in
+|/Tekelec/WebNMS/bin/scripts/measurement/ directory. By default, value of 'n' is 2 and
+|the admin is able to update the value as required.
+|
+|	meas = EagleIface(NAME);
+|	meas.logMsg("Started");
+|	meas.myexec(new String[] {WD+"/lib/measurement.bash", NAME});
+|	meas.logMsg("Completed");
+===================================================================*/

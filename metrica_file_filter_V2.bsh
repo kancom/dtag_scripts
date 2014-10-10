@@ -1,0 +1,27 @@
+//imports
+String WD = "/Tekelec/WebNMS/commandManagerScripts/root/default/"; //full path with trailing slash/
+addClassPath(WD);
+importCommands("/lib");
+
+//consts
+//=========Please make it actual===========
+String NAME = "metrica_file_filter_V2";
+//=========^^^^^^^^^^^^^^^^^===============
+
+//main
+
+/*===================================================================
+|	Similar function is implemented in new E5-MS
+|	see 910-6752-001 pg. 84
+|After verification of tekelec_meas_headers table and tekelec_meas_reports tables, the
+|Measurement platform module verifies whether the data (measurement report types and
+|corresponding database tables) required in tekelec_meas_reports table is available. If the data
+|is filled, it logs the messages of all the measurement report types supported and their corresponding
+|database tables (refer to message 3 in the Log Message List). If the data is not available, then it logs
+|the message (refer to message 4 in the Log Message List).
+*/
+meas = EagleIface(NAME);
+meas.logMsg("Started");
+meas.myexec(new String[] {WD+"/lib/measurement.bash", NAME});
+meas.logMsg("Completed");
+

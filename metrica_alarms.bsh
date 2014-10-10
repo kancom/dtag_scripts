@@ -1,0 +1,15 @@
+//imports
+String WD = "/Tekelec/WebNMS/commandManagerScripts/root/default/"; //full path with trailing slash/
+addClassPath(WD);
+importCommands("/lib");
+
+//consts
+//=========Please make it actual===========
+String NAME = "metrica_alarms";
+//=========^^^^^^^^^^^^^^^^^===============
+
+//main
+meas = EagleIface(NAME);
+meas.logMsg("Started");
+meas.myexec(new String[] {WD+"/lib/measurement.bash", NAME});
+meas.logMsg("Completed");

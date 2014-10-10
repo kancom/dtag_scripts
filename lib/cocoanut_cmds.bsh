@@ -1,0 +1,45 @@
+cocoanut_cmds() {
+  String[] BatchCmds = 
+  {
+  "rept-stat-db:display=all",
+  "rept-stat-db:display=all:db=mps",
+/*  "rept-stat-ls",
+  "rept-stat-mps",
+  "rept-stat-sccp",
+  "rept-stat-slk",
+  "rept-stat-iptps",
+  "rept-stat-sccp:mode=perf",
+  "rept-stat-assoc",
+  "rtrv-as",
+  "rtrv-appl-rtkey",
+  "rtrv-appl-rtkey:display=all",
+  "rtrv-assoc",
+  "rtrv-e1",
+  "rept-stat-e1",
+  "rtrv-ftp-serv:mode=full",
+  "rtrv-gpl",
+  "rtrv-gsmopts",
+  "rtrv-gsms-opcode",
+  "rtrv-gsmssn-scrn",
+  "rtrv-homern",
+  "rtrv-l2t",
+  "rtrv-l3t",
+  "rtrv-m2pa-tset",
+  "rtrv-meas-sched",
+  "rtrv-mrn",
+  "rtrv-sccp-serv",
+  "rtrv-serial-num",
+  "rtrv-sg-opts",
+  "rtrv-ss7opts",
+  "rtrv-stp",
+  "rtrv-tbl-capacity",
+  "rtrv-th-alm",
+  "rtrv-ttmap",
+  "rtrv-uaps",
+  "rtrv-uim-acthresh",
+  "rtrv-slt",
+  "rtrv-spc",*/
+  "rtrv-gtmod"
+  };
+  return this;
+}

@@ -1,0 +1,361 @@
+//imports
+import java.io.*;
+import java.io.BufferedReader;
+import java.util.regex.*;
+
+//vars
+String strCurCmd = "";
+String strCurHdr = "";
+Hashtable htHeaders;
+int DEBUGLVL = 2;
+
+//consts
+boolean bDataVerify = false;
+String strMinClnLimRegExp = "{2,}";//all "\" are replaced with "\\"
+String sOClDlRgEx = ",";//all "\" are replaced with "\\"
+String strWordRegExp = "([A-Za-z0-9/\\-\\*%]+ ?)+";//all "\" are replaced with "\\"
+String strColumnMinRepRegExp=" {2,}"; //all "\" are replaced with "\\"
+String strDataRegExp="^ *((([A-Za-z0-9:%\\*,\\._]|-) ?)+("+strColumnMinRepRegExp+"|$)){2,}"; //all "\" are replaced with "\\"
+String strCmdNameRegExp="^> *([a-z0-9\\-:=]+)$"; //all "\" are replaced with "\\"
+String strCmdOutBgnRegExp=".*Command Accepted.*"; //all "\" are replaced with "\\"
+String strCmdOutEndRegExp=".*(Command Executed|Command Completed).*"; //all "\" are replaced with "\\"
+
+String[] straCmdNmRefineRepRegExp = new String[] {"> +", ""}; //all "\" are replaced with "\\"
+String[] straTextPreProcRegExp = new String[] {"^ +| +$", "", strColumnMinRepRegExp, sOClDlRgEx, sOClDlRgEx+"-+", sOClDlRgEx+"n/a", "-+"+sOClDlRgEx, "n/a"+sOClDlRgEx}; //all "\" are replaced with "\\"
+String[][] straMergedHdrs = new String[][] {
+{"CARD"+sOClDlRgEx+"VERSION"+sOClDlRgEx+"PST"+sOClDlRgEx+"SST"+sOClDlRgEx+"AST"+sOClDlRgEx+"MSU"+sOClDlRgEx+"CPU",
+"                                                           USAGE USAGE",
+"CARD"+sOClDlRgEx+"VERSION"+sOClDlRgEx+"PST"+sOClDlRgEx+"SST"+sOClDlRgEx+"AST"+sOClDlRgEx+"MSU USAGE"+sOClDlRgEx+"CPU USAGE"},
+{"                                      FAIL     REROUTE\\      FORWARD",
+"SERVICE"+sOClDlRgEx+"SUCCESS"+sOClDlRgEx+"ERRORS"+sOClDlRgEx+"RATIO"+sOClDlRgEx+"WARNINGS"+sOClDlRgEx+"TO GTT"+sOClDlRgEx+"TOTAL",
+"SERVICE"+sOClDlRgEx+"SUCCESS"+sOClDlRgEx+"ERRORS"+sOClDlRgEx+"FAIL RATIO"+sOClDlRgEx+"REROUTE\\WARNINGS"+sOClDlRgEx+"FORWARD TO GTT"+sOClDlRgEx+"TOTAL"},
+{""+sOClDlRgEx+"THRESH"+sOClDlRgEx+"CONFIG/"+sOClDlRgEx+"CONFIG/"+sOClDlRgEx+""+sOClDlRgEx+"TPS"+sOClDlRgEx+"PEAK"+sOClDlRgEx+"PEAKTIMESTAMP",
+"                          RSVD      MAX",
+""+sOClDlRgEx+"THRESH"+sOClDlRgEx+"CONFIG/RSVD"+sOClDlRgEx+"CONFIG/MAX"+sOClDlRgEx+""+sOClDlRgEx+"TPS"+sOClDlRgEx+"PEAK"+sOClDlRgEx+"PEAKTIMESTAMP"},
+{"CARD"+sOClDlRgEx+"CPU"+sOClDlRgEx+"TOTAL"+sOClDlRgEx+"CLASS 0"+sOClDlRgEx+"CLASS 1",
+""+sOClDlRgEx+"USAGE"+sOClDlRgEx+"MSU RATE"+sOClDlRgEx+"MESSAGING RATE"+sOClDlRgEx+"MESSAGING RATE",
+"CARD"+sOClDlRgEx+"CPU USAGE"+sOClDlRgEx+"TOTAL MSU RATE"+sOClDlRgEx+"CLASS 0 MESSAGING RATE"+sOClDlRgEx+"CLASS 1 MESSAGING RATE"},
+{"                    CARD IPLNK",
+"ANAME"+sOClDlRgEx+"LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"LINK"+sOClDlRgEx+"PST"+sOClDlRgEx+"SST"+sOClDlRgEx+"ASPID",
+"ANAME"+sOClDlRgEx+"CARD LOC"+sOClDlRgEx+"IPLNK PORT"+sOClDlRgEx+"LINK"+sOClDlRgEx+"PST"+sOClDlRgEx+"SST"+sOClDlRgEx+"ASPID"},
+{"                    CARD  IPLNK",
+"ANAME"+sOClDlRgEx+"LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"LINK"+sOClDlRgEx+"ADAPTER"+sOClDlRgEx+"LPORT"+sOClDlRgEx+"RPORT"+sOClDlRgEx+"OPEN"+sOClDlRgEx+"ALW",
+"ANAME"+sOClDlRgEx+"CARD LOC"+sOClDlRgEx+"IPLNK PORT"+sOClDlRgEx+"LINK"+sOClDlRgEx+"ADAPTER"+sOClDlRgEx+"LPORT"+sOClDlRgEx+"RPORT"+sOClDlRgEx+"OPEN"+sOClDlRgEx+"ALW"},
+{"          E1                                                   LINK    MINSU",
+"LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"CRC4"+sOClDlRgEx+"CAS"+sOClDlRgEx+"ENCODE"+sOClDlRgEx+"E1TSEL"+sOClDlRgEx+"SI"+sOClDlRgEx+"SN"+sOClDlRgEx+"CHANBRDG"+sOClDlRgEx+"CLASS"+sOClDlRgEx+"RATE",
+"LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"CRC4"+sOClDlRgEx+"CAS"+sOClDlRgEx+"ENCODE"+sOClDlRgEx+"E1TSEL"+sOClDlRgEx+"SI"+sOClDlRgEx+"SN"+sOClDlRgEx+"CHANBRDG"+sOClDlRgEx+"LINK CLASS"+sOClDlRgEx+"MINSU RATE"},
+{"    ACTSN      TEST  ActIds   ",
+"               MODE",
+"ACTSN"+sOClDlRgEx+"TEST MODE"+sOClDlRgEx+"ActIds"},
+};
+String[][][] straHdrsPos = new String[][][] 
+{
+  {//0
+    {"rept-stat-db", "            C   LEVEL    TIME LAST BACKUP     C   LEVEL    TIME LAST BACKUP", "13", "15", "24", "47", "49", "58"},
+    {"rept-stat-db", "    CARD/APPL  LOC   C  T  LEVEL       TIME LAST UPDATE   EXCEPTION", "16", "22", "25", "28", "40", "59"},
+    {"rept-stat-db", "                     C  BIRTHDATE          LEVEL       EXCEPTION", "22", "25", "44", "56"},
+    {"rept-stat-db", "    CARD/APPL  LOC   C  BIRTHDATE          LEVEL       EXCEPTION    IN-SRVC", "16", "22", "25", "44", "56", "69"}
+  },
+  {//1
+    {"rept-stat-ls", "    LSN           APCA             PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCN             PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCN24           PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCI             PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCN16           PST           SST       AST", "17", "36", "50", "60"}
+  },
+  {//2
+    {"rept-stat-mps", "                       VERSION       PST            SST        AST", "24", "38", "53", "64"},
+    {"rept-stat-mps", "    CARD   PST          SST         GSM STAT", "12", "25", "37"},
+    {"rept-stat-mps", "    CARD   PST          SST         ATINPQ STAT", "12", "25", "37"},
+  },
+  {//3
+    {"rept-stat-sccp", "    CARD   VERSION      PST           SST        AST       MSU   CPU", "12", "25", "39", "50", "60", "66"},
+    {"rept-stat-sccp", "      SERVICE    SUCCESS    ERRORS   RATIO     WARNINGS        TO GTT     TOTAL", "16", "25", "35", "43", "56","70"},
+    {"rept-stat-sccp", "    HIGHEST 10 OVERALL DAILY PEAKS        LAST 10 DAILY PEAK SCCP LOADS", "43"},
+    {"rept-stat-sccp", "    CARD   CPU      TOTAL       CLASS 0          CLASS 1", "12", "21", "33", "50"}
+  },
+  {//4
+    {"rept-stat-slk", "    SLK      LSN         CLLI        PST          SST       AST", "14", "26", "38", "51", "61"}
+  },
+  {//5
+    {"rept-stat-iptps", "               THRESH  CONFIG/  CONFIG/         TPS   PEAK       PEAKTIMESTAMP", "16", "24", "33", "41", "49", "55", "62"}
+  },
+  {//6
+    {"rept-stat-assoc", "    ANAME           LOC  PORT   LINK PST             SST             ASPID", "21", "26", "33", "38", "54", "70"}
+  },
+  {//7
+    {"rtrv-as", "    AS Name          Mode        Tr ms  Association Names   ", "22", "34", "41"}
+  },
+  {//8
+    {"rtrv-assoc", "    ANAME           LOC   PORT  LINK ADAPTER LPORT RPORT OPEN ALW", "21", "27", "33", "38", "46", "52", "58", "63"}
+  },
+  {//9
+    {"rtrv-e1", "    LOC   PORT  CRC4  CAS  ENCODE  E1TSEL    SI  SN  CHANBRDG  CLASS   RATE", "11", "17", "23", "28", "36", "46", "50", "54", "64", "72"}
+  },
+  {//10
+    {"rept-stat-e1", "    LOC   E1PORT   PST              SST          AST", "11", "20", "37", "50"}
+  },
+  {//11
+    {"rtrv-gpl", "    GPL       CARD  RELEASE      APPROVED         TRIAL        REMOVE TRIAL", "15", "21", "34", "51", "64"}
+  },
+  {//12
+    {"rtrv-gsmopts", "    GSM OPTIONS ", "24", "40", "59", "51", "64"}
+  },
+  {//13
+    {"rtrv-l2t", "     L2TSET    T1     T2     T3   T4NPP   T4EPP     T5     T6    T7    NODATA", "12", "20", "26", "33", "40", "48", "56", "63", "69"}
+  },
+  {//14
+    {"rtrv-l3t", "     L3TSET   T1      T2      T3      T4      T5      T6      T7", "12", "20", "26", "37", "42", "50", "58"}
+  },
+  {//15
+    {"rtrv-m2pa-tset", "    TSET T1     T2     T3    T4N   T4E  T5    T6   T7    T16    T17  T18", "10", "17", "24", "30", "36", "41", "47", "52", "58", "65", "70"}
+  },
+  {//16
+    {"rtrv-ss7opts", "    SS7 OPTIONS", "17"}
+  },
+  {//17
+    {"rtrv-stp", "    Card  Part Number  Rev Serial Number  Type     DB     APPL     GPL Version", "11", "24", "28", "43", "52", "59", "68"}
+  },
+  {//18
+    {"rtrv-ttmap", "    LSN         IO  ETT  MTT", "17", "21", "26"}
+  },
+  {//19
+    {"rtrv-uaps", "    SET  TIMER      TVALUE  PARM      PVALUE", "8", "15", "27", "33"}
+  },
+  {//20
+    {"rtrv-uim-acthresh", "    UIMN      LIMIT     INTRVL", "15", "25"}
+  },
+  {//21
+    {"rtrv-slt", "    SLTSET T1   T2   MODE    ENABLED PATTERN", "12", "17", "22", "30", "38"}
+  },
+  {//22
+    {"rtrv-homern", "    RN", "28"}
+  },
+  {//23
+    {"rtrv-mrn", "       MRNSET      PCN            RC", "18", "34"}
+  },
+  {//24
+    {"rtrv-gttaset", "    ACTSN      TEST  ActIds   ", "14", "21"}
+  }
+};
+Boolean bToCSV = true;
+
+
+//body
+txt2csv()
+{
+
+int UNKWN=0;int DATA=1;int HDR=2;int CMDNM=3;int OUTBGN=4;int OUTEND=5;
+
+
+void
+myprint(String line, int level)
+{
+  if (DEBUGLVL>=level) {
+    print(line);
+  }
+}
+
+StringBuffer readFullOutput(String strFileName)
+{
+  myprint("in readFullOutput", 1);
+  StringBuffer result = new StringBuffer();
+  BufferedReader aReader =  new BufferedReader(new FileReader(strFileName));
+  String strLine = null;
+  while (( aLine = aReader.readLine()) != null) {
+    result.append(aLine);
+    result.append(System.getProperty("line.separator"));
+  }
+  aReader.close();
+  return result;
+}
+
+String replaceLineSeq(String strLine, String[] arRules)
+{
+  myprint("in replaceLineSeq", 1);
+  String result = strLine;
+  for (int iRule=0; iRule<arRules.length; iRule+=2) {
+    result = result.replaceAll(arRules[iRule], arRules[iRule+1]);
+  }
+  return result;
+}
+
+String checkMergeHdr(String strNewHdr)
+{
+  myprint("in checkMergeHdr", 1);
+  String result = strNewHdr;
+  for (int i=0; i<straMergedHdrs.length; i++) {
+    for (int j=0; j<2; j++) {
+      if (straMergedHdrs[i][j].equals(strNewHdr))
+        return straMergedHdrs[i][2];
+    }
+  }
+  return result;
+}
+
+boolean findHdr(String strLine, int[] ioutNb)
+{
+  myprint("in findHdr", 1);
+  for (int i=0; i<straHdrsPos.length; i++) {
+    for (int j=0; j<straHdrsPos[i].length; j++) {
+      myprint("findHdr:"+i+","+j+",0:"+straHdrsPos[i][j][0]+"::"+straHdrsPos[i][j][1], 3);
+      if (straHdrsPos[i][j][1].equals(strLine)) { ioutNb[0] = i; ioutNb[1] = j; return true;}
+    }
+  }
+  return false;
+}
+
+int getLineType(String strLine)
+{
+  myprint("in getLineType", 1);
+  myprint("getLineType:"+strLine, 2);
+  int result = UNKWN;
+  int[] i=new int[2];
+  if (strLine.matches("^[- ]{2,}$")) {return result;}
+  if (strLine.matches(strCmdNameRegExp)) {return CMDNM;}
+  if (strLine.matches(strCmdOutBgnRegExp)) {return OUTBGN;}
+  if (strLine.matches(strCmdOutEndRegExp)) {return OUTEND;}
+  if (findHdr(strLine, i)) {
+    myprint("getLineType:HDR", 2);
+    return HDR;
+   }
+  if (strLine.matches(strDataRegExp)) {;return DATA;}
+  return result;
+}
+
+void initCmdBlock(String strCmdName)
+{
+  myprint("in initCmdBlock", 1);
+  strCurCmd = strCmdName;
+  htHeaders = new Hashtable();
+}
+
+void addHeader(String strHeader)
+{
+  myprint("in addHeader", 1);
+  if (! htHeaders.containsKey(strHeader)) {
+    htHeaders.put(strHeader, new ArrayList());
+  }
+  strCurHdr = strHeader;
+}
+
+void addData(String strHeader, String strData)
+{
+  myprint("in addData", 1);
+  if (htHeaders.size()>0) {
+    ArrayList alData = htHeaders.get(strHeader);
+    strData = strData.replaceAll(",", ":");
+    alData.add(strData);
+  }
+}
+
+String addDelimiters(String strIn, int iCmdNb, int jHdrNb)
+{
+  myprint("in addDelimiters", 1);
+  int iPos;
+  if (strIn.matches("EAGLE5 44")) {return "";}
+  String result = strIn;
+  for (int i=straHdrsPos[iCmdNb][jHdrNb].length-1; i>=2; i--) {
+    iPos = Integer.parseInt(straHdrsPos[iCmdNb][jHdrNb][i])-1;
+    if (iPos>strIn.length()) {
+      myprint("addDelimiters:Drop as too short: "+result, 1); 
+      continue;/*return "";*/
+    }
+    if (Character.isLetterOrDigit(result.charAt(iPos-1)) && 
+       Character.isLetterOrDigit(result.charAt(iPos))) {
+         myprint("addDelimiters:Drop as sep within word(@"+iPos+"): "+result, 1);
+         return "";
+    }
+    result = result.substring(0, iPos) + sOClDlRgEx + result.substring(iPos, result.length());
+    myprint("addDelimiters:"+iPos+":"+result, 3);
+  }
+  result = replaceLineSeq(result, new String[] {"^ +| +$", "", " *"+sOClDlRgEx+" *", sOClDlRgEx});
+  return result;
+}
+
+void emitResult(String path)
+{
+  myprint("in emitResult", 1);
+  String strNormLine;
+  BufferedWriter csvfile;
+  int iHdrCnt = 0;
+  String strFileName = path+strCurCmd+".csv";
+  myprint("CMD:"+strCurCmd, 2);
+  Iterator itHdrs = htHeaders.entrySet().iterator();
+  while (itHdrs.hasNext()) {
+    htEntry = itHdrs.next();
+    ArrayList arCurData = htEntry.getValue();
+    if (arCurData.size()>0) {
+      int[] iNb = new int[2];
+      findHdr(htEntry.getKey(), iNb);
+      myprint(iNb[0]+","+iNb[1], 2);
+      strNormLine = addDelimiters(htEntry.getKey(), iNb[0], iNb[1]);
+      strNormLine = checkMergeHdr(strNormLine);
+      myprint("HDR:"+strNormLine, 2);
+      if (bToCSV) {
+        if (iHdrCnt>0) {strFileName = strCurCmd+iHdrCnt+".csv";}
+        csvfile = new BufferedWriter(new FileWriter(strFileName));
+        csvfile.write(strNormLine + "\n");
+      }
+      for (int i=0; i<arCurData.size(); i++) {
+        strNormLine = addDelimiters(arCurData.get(i), iNb[0], iNb[1]);
+        myprint("DATA:"+strNormLine, 2);
+        if (bToCSV) {
+          csvfile.write(strNormLine + "\n");
+        }
+      }
+      iHdrCnt++;
+    }
+    if (csvfile!=null) {
+      csvfile.close();
+      csvfile = null;
+    }
+  }
+}
+
+//main
+String convert(String strFileName)
+{
+StringBuffer allCmdsText = readFullOutput(strFileName);
+String strResultPath = strFileName.substring(0, strFileName.lastIndexOf(File.separator))+File.separator;
+String[] straAllLines = allCmdsText.toString().split(System.getProperty("line.separator"));
+
+Console console = System.console();
+
+
+for(String strSingleLine: straAllLines){
+//  strNormLine = replaceLineSeq(strSingleLine, straTextPreProcRegExp);
+String input = console.readLine();
+  switch (getLineType(strSingleLine)) {
+    case CMDNM: 
+      strCurCmd = replaceLineSeq(strSingleLine, straCmdNmRefineRepRegExp);
+      initCmdBlock(strCurCmd);
+      myprint("convert:CMDNM:"+strCurCmd, 2);
+      break;
+    case HDR:
+      myprint("convert:HDR:"+strSingleLine, 2);
+      addHeader(strSingleLine);
+      break;
+    case DATA:
+      addData(strCurHdr, strSingleLine);
+      myprint("convert:DATA:"+strNormLine, 2);
+      break;
+    case OUTBGN:
+      blIsCmdBody=true;
+      myprint("convert:BEGIN:", 2);
+      break;
+    case OUTEND: 
+      blIsCmdBody=false;
+      emitResult(strResultPath);
+      myprint("convert:END:", 2);
+      break;
+    default:
+      myprint("convert:UNKWN:"+strNormLine, 2);
+      break;
+  }
+}
+return strResultPath;
+}
+
+  return this;
+}

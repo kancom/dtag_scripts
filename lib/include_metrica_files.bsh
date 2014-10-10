@@ -1,0 +1,25 @@
+// this is a file for the script metrica_file_filter.php
+// to read the Eagle Measurements Files to process
+String[] Files = 
+  {
+  "systot-tt",
+  "systot-stp",
+  "systot-cgtt",
+  "avl-link",
+  "comp-lnkset",
+  "comp-link",
+  "comp-ua",
+  "comp-sctpcard",
+  "comp-sctpasoc",
+  "gtwy-stp",
+  "gtwy-lnkset",
+  "gtwy-origni",
+  "gtwy-lsdestni",
+  "gtwy-lsonismt",
+  "gtwy-origninc",
+  "gtwy-lsorigni",
+  "mtch-map",
+  "mtch-np",
+  "mtch-ssp",
+  "mtch-path"
+};

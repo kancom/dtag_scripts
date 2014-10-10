@@ -1,0 +1,94 @@
+//imports
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+//vars
+
+//consts
+String WD = "/Tekelec/WebNMS/commandManagerScripts/root/default/"; //full path with trailing slash/
+String RESOURCE = "E5-MS";
+String LogPath = "/var/log/"; //full path with trailing slash/
+String CmdResultPath = "/var/E5-MS/configuration/results/scripts/root/default/"; //full path with trailing slash/
+
+EagleIface(String SCRIPT) {
+
+CRITICAL=1;MAJOR=2;MINOR=3;WARNING=4;INFO=7;
+
+String myexec(String[] proc)
+{
+  Process p = Runtime.getRuntime().exec(proc);
+  BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+  return stdInput.readLine();
+}
+
+boolean sendBatchCmd(String[] CMDs, int pause)
+{
+  boolean result = false;
+  int cmds = 0;
+  for (int i=0; i<CMDs.length; i++) {
+    if (sendCmd(CMDs[i], true)) { cmds++; }
+    Thread.sleep(pause);
+  }
+  if (cmds>0) {result = true;}
+  return result;
+}
+
+boolean saveOutput(String path)
+{
+  boolean result = true;
+  File root = new File( CmdResultPath );
+  File[] list = root.listFiles();
+  if (list != null) {
+    for ( File f : list ) {
+      if (f.toString().matches("(.*)"+NAME+"(.*)")) {
+        result = result && f.renameTo(new File(path + f.getName()));
+        if (result) {
+          logMsg(f.toString()+" file moved to "+path);
+          converter = txt2csv();
+          logMsg("Converting "+path + f.getName());
+          logMsg("*.csv put under "+converter.convert(path + f.getName()));
+        }
+      }
+    }
+  }
+  return result; 
+}
+
+void archiveOutput(String path)
+{
+  logMsg(myexec(new String[] {WD+"/lib/tgznscp.bash", "setup", path}));
+}
+
+void pushAlarm(int sevrt, String msg)
+{
+  //logMsg("Alarm post: "+msg);
+  SendAlarm(RESOURCE, SCRIPT, sevrt, msg);
+}
+
+void logMsg(String msg)
+{
+  Date now = new Date();
+  SimpleDateFormat format_line = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss|");
+  SimpleDateFormat format_file = new SimpleDateFormat("yyyyMMdd");
+  Writer Logfile = new BufferedWriter(new FileWriter(LogPath+RESOURCE+SCRIPT+format_file.format(now)+".log", true));
+  try {
+    Logfile.write(format_line.format(now).toString() + msg+"\n" );
+  } finally {
+    Logfile.close();
+  }
+}
+
+boolean sendCmd(String cmd, boolean logme)
+{
+  if (logme) {
+    logMsg("Sending "+cmd+" command");
+  }
+  boolean result = SendCommand(cmd);
+  if (logme) {
+    result ? logMsg(cmd+" command accepted by Eagle") : logMsg(cmd + " command REFUSED by Eagle");
+  }
+  return result;
+}
+return this;
+}

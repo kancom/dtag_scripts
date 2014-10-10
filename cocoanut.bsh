@@ -1,0 +1,28 @@
+//rsync -avz --progress /media/FA3EF02A3EEFDD9F/Users/Андрей/Documents/Tekelec/temp/netboss/deploy/ root@10.64.4.13:/opt/E5-MS/commandManager/scripts/root/default/
+//imports
+String WD = "/Tekelec/WebNMS/commandManagerScripts/root/default/"; //full path with trailing slash/
+addClassPath(WD);
+importCommands("/lib");
+
+//vars
+String EagleCmd;
+String result;
+
+//consts
+//=========Please make it actual===========
+String NAME = "cocoanut";
+//=========^^^^^^^^^^^^^^^^^===============
+String SaveLogUnder = "/tmp/"; //full path with trailing slash/
+int inBatchDelay = 10; //(in milliseconds) delay between commands
+
+
+//main
+Cocoanut = EagleIface(NAME);
+CMDs = cocoanut_cmds();
+Cocoanut.logMsg("Started");
+result = Cocoanut.sendBatchCmd(CMDs.BatchCmds, inBatchDelay) ? "sendBatchCmd Succd" : "sendBatchCmd Failed";
+Cocoanut.logMsg(result);
+result = Cocoanut.saveOutput(SaveLogUnder) ? "saveOutput Succd" : "saveOutput Failed";
+Cocoanut.logMsg(result);
+Cocoanut.archiveOutput(SaveLogUnder);
+Cocoanut.logMsg("Completed");
