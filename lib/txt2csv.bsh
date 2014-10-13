@@ -255,6 +255,8 @@ void addData(String strHeader, String strData)
     ArrayList alData = htHeaders.get(strHeader);
     strData = strData.replaceAll(",", ":");
     alData.add(strData);
+  } else {
+    myprint("addData: skip line "+strData, 2);
   }
 }
 
@@ -262,9 +264,10 @@ String addDelimiters(String strIn, int iCmdNb, int jHdrNb)
 {
   myprint("in addDelimiters", 1);
   int iPos;
-  if (strIn.matches("EAGLE5 44")) {return "";}
+  if (strIn.matches(".*EAGLE5 44.*")) {return "";}
   String result = strIn;
   for (int i=straHdrsPos[iCmdNb][jHdrNb].length-1; i>=2; i--) {
+    myprint("addDelimiters:"+straHdrsPos[iCmdNb][jHdrNb], 4);
     iPos = Integer.parseInt(straHdrsPos[iCmdNb][jHdrNb][i])-1;
     if (iPos>strIn.length()) {
       myprint("addDelimiters:Drop as too short: "+result, 1); 
@@ -412,6 +415,100 @@ treat_rtrv_tbl_capacity(String line)
 }
 
 void
+treat_rtrv_th_alm(String line)
+{
+  myprint("in treat_rtrv_th_alm", 1);
+  String hdr = "rtrv-th-alm                                                                    ";
+  addHeader(hdr);
+  String dlmt = ": ";
+  if (line.matches("^.*"+dlmt+".*$")) {
+    line = replaceLineSeq(line, new String[] {dlmt, "  "});
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^.*RTRV-TH-ALM.*COMPLTD.*$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-th-alm", hdr, "48"}}};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
+treat_rtrv_ip_card(String line)
+{
+  myprint("in treat_rtrv_ip_card", 1);
+  String hdr = "rtrv-ip-card                                                                    ";
+  addHeader(hdr);
+  addData(strCurHdr, line);
+  if (line.matches("^ +$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-ip-card", hdr, "16"}}};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
+treat_rtrv_measopts(String line)
+{
+  myprint("in treat_rtrv_measopts", 1);
+  String hdr = "rtrv-measopts                                                                    ";
+  addHeader(hdr);
+  String dlmt = "=";
+  if (line.matches("^.*"+dlmt+".*$")) {
+    line = replaceLineSeq(line, new String[] {dlmt, " "});
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^ +$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-measopts", hdr, "23"}}};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
+treat_rtrv_mtc_measopts(String line)
+{
+  myprint("in treat_rtrv_mtc_measopts", 1);
+  String hdr = "rtrv-mtc-measopts                                                                    ";
+  addHeader(hdr);
+  String dlmt = "=";
+  if (line.matches("^.*"+dlmt+".*$")) {
+    line = replaceLineSeq(line, new String[] {dlmt, " "});
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^ +$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-mtc-measopts", hdr, "23"}}};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
+treat_rtrv_spc(String line)
+{
+  myprint("in treat_rtrv_spc", 1);
+  String hdr = "    rtrv-spc                            ";
+  addHeader(hdr);
+  addData(strCurHdr, line);
+  if (line.matches("^ +$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-spc", hdr, "4"}}};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
+treat_rtrv_feat(String line)
+{
+  myprint("in treat_rtrv_feat", 1);
+  String hdr = "rtrv-feat                                                                    ";
+  addHeader(hdr);
+  String dlmt = "=";
+  if (line.matches("^.*"+dlmt+".*$")) {
+    line = replaceLineSeq(line, new String[] {dlmt, " "});
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^ +$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-feat", hdr, "15", "23", "34", "43", "53"}}};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
 treatSpclCmd(String line)
 {
   myprint("in treatSpclCmd", 1);
@@ -437,6 +534,24 @@ treatSpclCmd(String line)
     case "rtrv-tbl-capacity":
       treat_rtrv_tbl_capacity(line);
       break;
+    case "rtrv-th-alm":
+      treat_rtrv_th_alm(line);
+      break;
+    case "rtrv-ip-card":
+      treat_rtrv_ip_card(line);
+      break;
+    case "rtrv-measopts":
+      treat_rtrv_measopts(line);
+      break;
+    case "rtrv-mtc-measopts":
+      treat_rtrv_mtc_measopts(line);
+      break;
+    case "rtrv-spc":
+      treat_rtrv_spc(line);
+      break;
+    case "rtrv-feat":
+      treat_rtrv_feat(line);
+      break;
   }
 }
 
@@ -447,6 +562,7 @@ treatSpclCmd(String line)
 
 void emitResult(String path)
 {
+Console console = System.console();
   myprint("in emitResult", 1);
   String strNormLine;
   BufferedWriter csvfile;
@@ -477,6 +593,9 @@ void emitResult(String path)
         }
       }
       iHdrCnt++;
+
+String input = console.readLine();
+
     }
     if (csvfile!=null) {
       csvfile.close();
@@ -491,15 +610,8 @@ String convert(String strFileName)
 StringBuffer allCmdsText = readFullOutput(strFileName);
 String strResultPath = strFileName.substring(0, strFileName.lastIndexOf(File.separator))+File.separator;
 String[] straAllLines = allCmdsText.toString().split(System.getProperty("line.separator"));
-
-Console console = System.console();
-
-
 for(String strSingleLine: straAllLines){
 //  strNormLine = replaceLineSeq(strSingleLine, straTextPreProcRegExp);
-
-String input = console.readLine();
-
   switch (getLineType(strSingleLine)) {
     case CMDNM: 
       strCurCmd = replaceLineSeq(strSingleLine, straCmdNmRefineRepRegExp);
