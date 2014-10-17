@@ -8,7 +8,7 @@ String strCurCmd = "";
 String strCurHdr = "";
 Hashtable htHeaders;
 boolean bSPECIALCMD = false;
-int DEBUGLVL = 3;
+int DEBUGLVL = 0;
 boolean blIsCmdBody = false;
 
 //consts
@@ -562,7 +562,6 @@ treatSpclCmd(String line)
 
 void emitResult(String path)
 {
-Console console = System.console();
   myprint("in emitResult", 1);
   String strNormLine;
   BufferedWriter csvfile;
@@ -593,9 +592,6 @@ Console console = System.console();
         }
       }
       iHdrCnt++;
-
-String input = console.readLine();
-
     }
     if (csvfile!=null) {
       csvfile.close();
@@ -611,7 +607,6 @@ StringBuffer allCmdsText = readFullOutput(strFileName);
 String strResultPath = strFileName.substring(0, strFileName.lastIndexOf(File.separator))+File.separator;
 String[] straAllLines = allCmdsText.toString().split(System.getProperty("line.separator"));
 for(String strSingleLine: straAllLines){
-//  strNormLine = replaceLineSeq(strSingleLine, straTextPreProcRegExp);
   switch (getLineType(strSingleLine)) {
     case CMDNM: 
       strCurCmd = replaceLineSeq(strSingleLine, straCmdNmRefineRepRegExp);
