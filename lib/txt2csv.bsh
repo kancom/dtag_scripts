@@ -8,7 +8,7 @@ String strCurCmd = "";
 String strCurHdr = "";
 Hashtable htHeaders;
 boolean bSPECIALCMD = false;
-int DEBUGLVL = 0;
+int DEBUGLVL = 3;
 boolean blIsCmdBody = false;
 
 //consts
@@ -45,8 +45,16 @@ String[][] straMergedHdrs = new String[][] {
 "ANAME"+sOClDlRgEx+"CARD LOC"+sOClDlRgEx+"IPLNK PORT"+sOClDlRgEx+"LINK"+sOClDlRgEx+"ADAPTER"+sOClDlRgEx+"LPORT"+sOClDlRgEx+"RPORT"+sOClDlRgEx+"OPEN"+sOClDlRgEx+"ALW"},
 {"          E1                                                   LINK    MINSU",
 "LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"CRC4"+sOClDlRgEx+"CAS"+sOClDlRgEx+"ENCODE"+sOClDlRgEx+"E1TSEL"+sOClDlRgEx+"SI"+sOClDlRgEx+"SN"+sOClDlRgEx+"CHANBRDG"+sOClDlRgEx+"CLASS"+sOClDlRgEx+"RATE",
-"LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"CRC4"+sOClDlRgEx+"CAS"+sOClDlRgEx+"ENCODE"+sOClDlRgEx+"E1TSEL"+sOClDlRgEx+"SI"+sOClDlRgEx+"SN"+sOClDlRgEx+"CHANBRDG"+sOClDlRgEx+"LINK CLASS"+sOClDlRgEx+"MINSU RATE"}
+"LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"CRC4"+sOClDlRgEx+"CAS"+sOClDlRgEx+"ENCODE"+sOClDlRgEx+"E1TSEL"+sOClDlRgEx+"SI"+sOClDlRgEx+"SN"+sOClDlRgEx+"CHANBRDG"+sOClDlRgEx+"LINK CLASS"+sOClDlRgEx+"MINSU RATE"},
+{"LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"ANAME"+sOClDlRgEx+"SLKTPS/"+sOClDlRgEx+"MAXSLKTPS",
+"                                                      RSVDSLKTPS",
+"LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"ANAME"+sOClDlRgEx+"SLKTPS/RSVDSLKTPS"+sOClDlRgEx+"MAXSLKTPS"},
+{"                                      L2T               PCR  PCR    E1   E1    ",
+"LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"N1"+sOClDlRgEx+"N2"+sOClDlRgEx+"LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"TS",
+"LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"L2T SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"PCR N1"+sOClDlRgEx+"PCR N2"+sOClDlRgEx+"E1 LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"TS"}
 };
+
+
 String[][][] straHdrsPos = new String[][][] 
 {
   {//0
@@ -132,11 +140,15 @@ String[][][] straHdrsPos = new String[][][]
   },
   {//23
     {"rtrv-mrn", "       MRNSET      PCN            RC", "18", "34"}
+  },
+  {//24
+    {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     ANAME           SLKTPS/      MAXSLKTPS", "9", "14", "25", "29", "38", "54", "67"},
+    {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     SET  BPS    ECM   N1   N2     LOC  PORT TS", "9", "14", "25", "29", "38", "43", "50", "56", "61", "68", "73", "78"},
   }
 };
 
 String strSpecialCmds = "rtrv-gttaset|rtrv-gsmopts|rtrv-meas-sched|rtrv-sccp-serv|rtrv-serial-num|rtrv-sg-opts|rtrv-tbl-capacity|"
-                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat";
+                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel";
 
 Boolean bToCSV = true;
 
@@ -205,7 +217,11 @@ boolean findHdr(String strLine, int[] ioutNb)
   for (int i=0; i<straHdrsPos.length; i++) {
     for (int j=0; j<straHdrsPos[i].length; j++) {
       myprint("findHdr:"+i+","+j+",0:"+straHdrsPos[i][j][0]+"::"+straHdrsPos[i][j][1], 4);
-      if (straHdrsPos[i][j][1].equals(strLine)) { ioutNb[0] = i; ioutNb[1] = j; return true;}
+      if (straHdrsPos[i][j][1].equals(strLine)) {
+        ioutNb[0] = i;
+        ioutNb[1] = j;
+        return true;
+      }
     }
   }
   return false;
@@ -509,6 +525,39 @@ treat_rtrv_feat(String line)
 }
 
 void
+treat_rtrv_gttsel(String line)
+{
+  myprint("in treat_rtrv_gttsel", 1);
+  if (line.matches("^.*ANSI TT  NP.*$")) {
+    addHeader("    ANSI TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET");
+  } else if (line.matches("^.*INT  TT  NP.*$")) {
+    addHeader("    INT  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET");
+  } else if (line.matches("^.*NAT  TT  NP.*$")) {
+    addHeader("    NAT  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET");
+  } else if (line.matches("^.*N24  TT  NP.*$")) {
+    addHeader("    N24  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET");
+  } else if (line.matches("^.*INTS TT  NP.*$")) {
+    addHeader("    INTS TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET");
+  } else if (line.matches("^.*NATS TT  NP.*$")) {
+    addHeader("    NATS TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET");
+  }
+  if (line.matches("^.*e[1-9]+.*$")) {
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^;$")) {
+    String[][][] new_straHdrsPos = {{
+      {"rtrv-gttsel", "    ANSI TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "9", "13", "21", "26", "30", "36", "47", "64"},
+      {"rtrv-gttsel", "    INT  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "9", "13", "21", "26", "30", "36", "47", "64"},
+      {"rtrv-gttsel", "    NAT  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "9", "13", "21", "26", "30", "36", "47", "64"},
+      {"rtrv-gttsel", "    N24  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "9", "13", "21", "26", "30", "36", "47", "64"},
+      {"rtrv-gttsel", "    INTS TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "9", "13", "21", "26", "30", "36", "47", "64"},
+      {"rtrv-gttsel", "    NATS TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "9", "13", "21", "26", "30", "36", "47", "64"},
+    }};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
 treatSpclCmd(String line)
 {
   myprint("in treatSpclCmd", 1);
@@ -552,6 +601,9 @@ treatSpclCmd(String line)
     case "rtrv-feat":
       treat_rtrv_feat(line);
       break;
+    case "rtrv-gttsel":
+      treat_rtrv_gttsel(line);
+      break;
   }
 }
 
@@ -580,7 +632,7 @@ void emitResult(String path)
       strNormLine = checkMergeHdr(strNormLine);
       myprint("HDR:"+strNormLine, 2);
       if (bToCSV) {
-        if (iHdrCnt>0) {strFileName = path+strCurCmd+iHdrCnt+".csv";}
+        if (iHdrCnt>0) {strFileName = path+strCurCmd+(iHdrCnt+1)+".csv";}
         csvfile = new BufferedWriter(new FileWriter(strFileName));
         csvfile.write(strNormLine + "\n");
       }
