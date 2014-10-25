@@ -2,6 +2,7 @@
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.*;
 
 //vars
 
@@ -34,14 +35,28 @@ boolean sendBatchCmd(String[] CMDs, int pause)
   return result;
 }
 
-boolean saveOutput(String path)
+boolean saveOutput(String orgpath, boolean bDedDir)
 {
   boolean result = true;
+  String pttrn = ".*#(.*)\\.txt";
+  Pattern pattern = Pattern.compile(pttrn);
+  Matcher matcher;
+  String path;
   File root = new File( CmdResultPath );
   File[] list = root.listFiles();
   if (list != null) {
     for ( File f : list ) {
-      if (f.toString().matches("(.*)"+NAME+"(.*)")) {
+      if (f.toString().matches("(.*)"+SCRIPT+"(.*)")) {
+        if (bDedDir) {
+          matcher = pattern.matcher(f.toString());
+          if (matcher.find()) {
+            path = orgpath + "/" + matcher.group(1) + "/";
+            File dir = new File(path);
+            result = dir.mkdir();
+          }
+        } else {
+          path = orgpath;
+        }
         result = result && f.renameTo(new File(path + f.getName()));
         if (result) {
           logMsg(f.toString()+" file moved to "+path);
