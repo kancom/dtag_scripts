@@ -148,7 +148,7 @@ String[][][] straHdrsPos = new String[][][]
 };
 
 String strSpecialCmds = "rtrv-gttaset|rtrv-gsmopts|rtrv-meas-sched|rtrv-sccp-serv|rtrv-serial-num|rtrv-sg-opts|rtrv-tbl-capacity|"
-                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel";
+                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn";
 
 Boolean bToCSV = true;
 
@@ -558,6 +558,31 @@ treat_rtrv_gttsel(String line)
 }
 
 void
+treat_rtrv_dstn(String line)
+{
+  myprint("in treat_rtrv_dstn", 1);
+  if (line.matches("^.*DPCI          CLLI        BEI.*$")) {
+    addHeader("       DPCI          CLLI        BEI ELEI   ALIASA           ALIASN/N24    DMN");
+  } else if (line.matches("^.*DPCN          CLLI        BEI.*$")) {
+    addHeader("       DPCN          CLLI        BEI ELEI   ALIASA           ALIASI        DMN");
+  } else if (line.matches("^.*DESTINATION ENTRIES ALLOCATED.*$")) {
+    addHeader("Parameter                            Value");
+  }
+  if (line.matches("^.*[:\\-]+.*$")) {
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^;$")) {
+    String[][][] new_straHdrsPos = {{
+      {"rtrv-dstn", "       DPCI          CLLI        BEI ELEI   ALIASA           ALIASN/N24    DMN", "21", "33", "37", "42", "58", "75"},
+      {"rtrv-dstn", "       DPCN          CLLI        BEI ELEI   ALIASA           ALIASI        DMN", "21", "33", "37", "42", "58", "75"},
+      {"rtrv-dstn", "Parameter                            Value", "35"}
+    }};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+
+void
 treatSpclCmd(String line)
 {
   myprint("in treatSpclCmd", 1);
@@ -603,6 +628,9 @@ treatSpclCmd(String line)
       break;
     case "rtrv-gttsel":
       treat_rtrv_gttsel(line);
+      break;
+    case "rtrv-dstn":
+      treat_rtrv_dstn(line);
       break;
   }
 }
