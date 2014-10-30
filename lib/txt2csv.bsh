@@ -51,7 +51,13 @@ String[][] straMergedHdrs = new String[][] {
 "LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"ANAME"+sOClDlRgEx+"SLKTPS/RSVDSLKTPS"+sOClDlRgEx+"MAXSLKTPS"},
 {"                                      L2T               PCR  PCR    E1   E1    ",
 "LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"N1"+sOClDlRgEx+"N2"+sOClDlRgEx+"LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"TS",
-"LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"L2T SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"PCR N1"+sOClDlRgEx+"PCR N2"+sOClDlRgEx+"E1 LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"TS"}
+"LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"L2T SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"PCR N1"+sOClDlRgEx+"PCR N2"+sOClDlRgEx+"E1 LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"TS"},
+{"                                     L3T SLT              GWS GWS GWS",
+"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"SET"+sOClDlRgEx+"SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"ACT"+sOClDlRgEx+"MES"+sOClDlRgEx+"DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS",
+"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"},
+{"                                     L3T SLT              GWS GWS GWS",
+"LSN"+sOClDlRgEx+"APCI   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"SET"+sOClDlRgEx+"SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"ACT"+sOClDlRgEx+"MES"+sOClDlRgEx+"DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS",
+"LSN"+sOClDlRgEx+"APCI   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"}
 };
 
 
@@ -143,7 +149,12 @@ String[][][] straHdrsPos = new String[][][]
   },
   {//24
     {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     ANAME           SLKTPS/      MAXSLKTPS", "9", "14", "25", "29", "38", "54", "67"},
-    {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     SET  BPS    ECM   N1   N2     LOC  PORT TS", "9", "14", "25", "29", "38", "43", "50", "56", "61", "68", "73", "78"},
+    {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     SET  BPS    ECM   N1   N2     LOC  PORT TS", "9", "14", "25", "29", "38", "43", "50", "56", "61", "68", "73", "78"}
+  },
+  {//25
+    {"rtrv-ls", "                                     L3T SLT              GWS GWS GWS", "16"}, /*fake header*/
+    {"rtrv-ls", "    LSN           APCI   (SS7)  SCRN SET SET BEI LST LNKS ACT MES DIS SLSCI NIS", "16", "32", "37", "41", "45", "49", "53", "58", "62", "66", "70", "76"},
+    {"rtrv-ls", "    LSN           APCN   (SS7)  SCRN SET SET BEI LST LNKS ACT MES DIS SLSCI NIS", "16", "32", "37", "41", "45", "49", "53", "58", "62", "66", "70", "76"}
   }
 };
 
@@ -285,17 +296,17 @@ String addDelimiters(String strIn, int iCmdNb, int jHdrNb)
   for (int i=straHdrsPos[iCmdNb][jHdrNb].length-1; i>=2; i--) {
     myprint("addDelimiters:"+straHdrsPos[iCmdNb][jHdrNb], 4);
     iPos = Integer.parseInt(straHdrsPos[iCmdNb][jHdrNb][i])-1;
-    if (iPos>strIn.length()) {
+    if (iPos>=strIn.length()) {
       myprint("addDelimiters:Drop as too short: "+result, 1); 
-      continue;/*return "";*/
+    } else {
+      if (Character.isLetterOrDigit(result.charAt(iPos-1)) && 
+         Character.isLetterOrDigit(result.charAt(iPos))) {
+           myprint("addDelimiters:Drop as sep within word(@"+iPos+"): "+result.substring(iPos, result.length()), 1);
+           return "";
+      }
+      result = result.substring(0, iPos) + sOClDlRgEx + result.substring(iPos, result.length());
+      myprint("addDelimiters:"+iPos+":"+result, 3);
     }
-    if (Character.isLetterOrDigit(result.charAt(iPos-1)) && 
-       Character.isLetterOrDigit(result.charAt(iPos))) {
-         myprint("addDelimiters:Drop as sep within word(@"+iPos+"): "+result.substring(iPos, result.length()), 1);
-         return "";
-    }
-    result = result.substring(0, iPos) + sOClDlRgEx + result.substring(iPos, result.length());
-    myprint("addDelimiters:"+iPos+":"+result, 3);
   }
   result = replaceLineSeq(result, new String[] {"^ +| +$", "", " *"+sOClDlRgEx+" *", sOClDlRgEx});
   return result;

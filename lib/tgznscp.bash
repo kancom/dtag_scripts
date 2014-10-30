@@ -25,13 +25,13 @@ function run()
 {
   cd $arg1;
   fname="$(date +%Y%m%d_%H%M).tgz";
-  find $arg1 -name '*.csv' | tar -czf $fname -T -
+  find ./ -name '*.csv' | tar -czf $fname -T -
   if ! sftp $fname $remote && rm -f $fname;
   then
     raisealarm;
   fi
-  cd ..
   find $arg1 -name '*.csv' -type f -delete
+  cd ..
 }
 
 if [ "$1" = "setup" ]
