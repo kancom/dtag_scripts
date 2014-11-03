@@ -159,7 +159,7 @@ String[][][] straHdrsPos = new String[][][]
 };
 
 String strSpecialCmds = "rtrv-gttaset|rtrv-gsmopts|rtrv-meas-sched|rtrv-sccp-serv|rtrv-serial-num|rtrv-sg-opts|rtrv-tbl-capacity|"
-                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn|rtrv-gta";
+                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn|rtrv-gta|rtrv-map";
 
 Boolean bToCSV = true;
 
