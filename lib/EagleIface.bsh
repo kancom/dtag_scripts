@@ -52,7 +52,7 @@ boolean saveOutput(String orgpath, boolean bDedDir)
           if (matcher.find()) {
             path = orgpath + "/" + matcher.group(1) + "/";
             File dir = new File(path);
-            result = dir.mkdir();
+            dir.mkdir();
           }
         } else {
           path = orgpath;
