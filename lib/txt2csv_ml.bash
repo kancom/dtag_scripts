@@ -2,18 +2,25 @@
 
 cd $1;
 
+dos2unix "$2"
+
 awk '
 {
   if ($0 ~ /> rtrv-gta/) {
     body=0;
-    cmd=gensub(/[^a-z0-9\-]/, "", "g");
+    cmd=gensub(/[^a-z0-9\-=:]/, "", "g");
     fname = cmd ".csv";
-    print "START GTA,END GTA,XLAT,RI,ITU PC,MRNSET/MAPSET,SSN,CCGT,CGGTMOD,GTMODID,LOOPSET,OPTSN,CGSELID,OPCSN,ACTSN,PPMEASREQD" > fname;
+    if (cmd !~ /smsfraud/) {
+      print "START GTA,END GTA,XLAT,RI,ITU PC,MRNSET/MAPSET,SSN,CCGT,CGGTMOD,GTMODID,TESTMODE,LOOPSET,FALLBACK,OPTSN,CGSELID,CDSELID,OPCSN,ACTSN,PPMEASREQD" > fname;
+    } else {
+      print "START GTA,END GTA,XLAT,MAPSET,MRNSET,CGGTMOD,GTMODID,TESTMODE,LOOPSET,FALLBACK,OPTSN,CGSELID,CDSELID,ACTSN,PPMEASREQD" > fname;
+    }
   }
   if ($0 ~ /START GTA.*END GTA.*XLAT/) {
     body=1;
   } else if (body) {
     $0 = gensub(/^ +| +$/, "", "g");
+    $0 = gensub(/ *= */, "=", "g");
     $0 = gensub(/([^=]) +([A-Z]+=)/, "\\1,\\2", "g");
     if ($0 ~ /Command/) {$0=""}
     if ($0==";") {
