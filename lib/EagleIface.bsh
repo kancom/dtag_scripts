@@ -62,9 +62,9 @@ boolean saveOutput(String orgpath, boolean bDedDir)
           logMsg(f.toString()+" file moved to "+path);
           converter = txt2csv();
           logMsg("Converting "+path + f.getName());
+          logMsg("*.csv put under "+converter.convert(path + f.getName()));
           logMsg("Multiline cmds..");
           myexec(new String[] {WD+"/lib/txt2csv_ml.bash", path, f.getName()});
-          logMsg("*.csv put under "+converter.convert(path + f.getName()));
         }
       }
     }

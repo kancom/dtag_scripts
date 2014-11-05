@@ -10,27 +10,85 @@ awk '
     body=0;
     cmd=gensub(/[^a-z0-9\-=:]/, "", "g");
     fname = cmd ".csv";
-    if (cmd !~ /smsfraud/) {
-      print "START GTA,END GTA,XLAT,RI,ITU PC,MRNSET/MAPSET,SSN,CCGT,CGGTMOD,GTMODID,TESTMODE,LOOPSET,FALLBACK,OPTSN,CGSELID,CDSELID,OPCSN,ACTSN,PPMEASREQD" > fname;
-    } else {
-      print "START GTA,END GTA,XLAT,MAPSET,MRNSET,CGGTMOD,GTMODID,TESTMODE,LOOPSET,FALLBACK,OPTSN,CGSELID,CDSELID,ACTSN,PPMEASREQD" > fname;
-    }
+    print "START GTA,END GTA,XLAT,RI,ITU PC,MRNSET,MAPSET,SSN,CCGT,CGGTMOD,GTMODID,TESTMODE,LOOPSET,FALLBACK,OPTSN,CGSELID,CDSELID,OPCSN,ACTSN,PPMEASREQD" > fname;
   }
   if ($0 ~ /START GTA.*END GTA.*XLAT/) {
     body=1;
   } else if (body) {
     $0 = gensub(/^ +| +$/, "", "g");
     $0 = gensub(/ *= */, "=", "g");
-    $0 = gensub(/([^=]) +([A-Z]+=)/, "\\1,\\2", "g");
-    if ($0 ~ /Command/) {$0=""}
+    if ($0 ~ /Command/) {
+      $0="";
+      printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", SGTA, EGTA, XLAT, RI, ITUPC, MRNSET, MAPSET, SSN, CCGT, CGGTMOD, GTMODID, TESTMODE, LOOPSET, FALLBACK, OPTSN, CGSELID, CDSELID, OPCSN, ACTSN, PPMEASREQD >> fname;
+      SGTA = EGTA = XLAT = RI = ITUPC = MRNSET = MAPSET = SSN = CCGT = CGGTMOD = GTMODID = TESTMODE = LOOPSET = FALLBACK = OPTSN = CGSELID = CDSELID = OPCSN = ACTSN = PPMEASREQD = "";
+    }
     if ($0==";") {
       body=0;
     } else if ($0 ~ /[a-z0-9]+ +[a-z0-9]+/) {
-      $0 = gensub(/([^=]) +([^=])/, "\\1,\\2", "g");
-      printf "\n%s",$0 >> fname;
+      printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", SGTA, EGTA, XLAT, RI, ITUPC, MRNSET, MAPSET, SSN, CCGT, CGGTMOD, GTMODID, TESTMODE, LOOPSET, FALLBACK, OPTSN, CGSELID, CDSELID, OPCSN, ACTSN, PPMEASREQD >> fname;
+      SGTA = EGTA = XLAT = RI = ITUPC = MRNSET = MAPSET = SSN = CCGT = CGGTMOD = GTMODID = TESTMODE = LOOPSET = FALLBACK = OPTSN = CGSELID = CDSELID = OPCSN = ACTSN = PPMEASREQD = "";
+      if (match($0, /^([[:alnum:]]+).*/)) {
+        SGTA=gensub(/^([[:alnum:]]+).*/, "\\1", "g");
+      }
+      if (match($0, /^([[:alnum:]]+ +){1}([[:alnum:]]+).*/)) {
+        EGTA=gensub(/^([[:alnum:]]+ +){1}([[:alnum:]]+).*/, "\\2", "g");
+      }
+      if (match($0, /^([[:alnum:]]+ +){2}([[:alnum:]]+).*/)) {
+        XLAT=gensub(/^([[:alnum:]]+ +){2}([[:alnum:]]+).*/, "\\2", "g");
+      }
+      if (match($0, /^([[:alnum:]]+ +){3}([[:alnum:]]+).*/)) {
+        RI=gensub(/^([[:alnum:]]+ +){3}([[:alnum:]]+).*/, "\\2", "g");
+      }
+      if (match($0, /^([[:alnum:]]+ +){4}.*$/)) {
+        ITUPC=gensub(/^([[:alnum:]]+ +){4}(.*)$/, "\\2", "g");
+      }
     } else if ($0 ~ /[A-Z]+=/) {
-      $0 = gensub(/[A-Z]+=/, "", "g");
-      printf ",%s", $0 >> fname;
+      if ($0 ~ /MRNSET/) {
+        MRNSET = gensub(/.*MRNSET=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /MAPSET/) {
+        MAPSET = gensub(/.*MAPSET=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /SSN/) {
+        SSN = gensub(/.*SSN=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /CCGT/) {
+        CCGT = gensub(/.*CCGT=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /CGGTMOD/) {
+        CGGTMOD = gensub(/.*CGGTMOD=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /GTMODID/) {
+        GTMODID = gensub(/.*GTMODID=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /TESTMODE/) {
+        TESTMODE = gensub(/.*TESTMODE=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /LOOPSET/) {
+        LOOPSET = gensub(/.*LOOPSET=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /FALLBACK/) {
+        FALLBACK = gensub(/.*FALLBACK=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /OPTSN/) {
+        OPTSN = gensub(/.*OPTSN=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /CGSELID/) {
+        CGSELID = gensub(/.*CGSELID=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /CDSELID/) {
+        CDSELID = gensub(/.*CDSELID=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /OPCSN/) {
+        OPCSN = gensub(/.*OPCSN=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /ACTSN/) {
+        ACTSN = gensub(/.*ACTSN=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+      if ($0 ~ /PPMEASREQD/) {
+        PPMEASREQD = gensub(/.*PPMEASREQD=([A-Za-z0-9\-]+).*/, "\\1", "g");
+      }
+
     }
   }
 }
