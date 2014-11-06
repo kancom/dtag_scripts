@@ -4,7 +4,7 @@ cd $1;
 
 dos2unix "$2"
 
-awk '
+awk --re-interval '
 {
   if ($0 ~ /> rtrv-gta/) {
     body=0;
@@ -24,7 +24,7 @@ awk '
     }
     if ($0==";") {
       body=0;
-    } else if ($0 ~ /[a-z0-9]+ +[a-z0-9]+/) {
+    } else if ($0 ~ /[a-z]*[0-9]+ +[a-z]*[0-9]+/) {
       printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", SGTA, EGTA, XLAT, RI, ITUPC, MRNSET, MAPSET, SSN, CCGT, CGGTMOD, GTMODID, TESTMODE, LOOPSET, FALLBACK, OPTSN, CGSELID, CDSELID, OPCSN, ACTSN, PPMEASREQD >> fname;
       SGTA = EGTA = XLAT = RI = ITUPC = MRNSET = MAPSET = SSN = CCGT = CGGTMOD = GTMODID = TESTMODE = LOOPSET = FALLBACK = OPTSN = CGSELID = CDSELID = OPCSN = ACTSN = PPMEASREQD = "";
       if (match($0, /^([[:alnum:]]+).*/)) {
