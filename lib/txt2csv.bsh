@@ -8,7 +8,7 @@ String strCurCmd = "";
 String strCurHdr = "";
 Hashtable htHeaders;
 boolean bSPECIALCMD = false;
-int DEBUGLVL = 3;
+int DEBUGLVL = 0;
 boolean blIsCmdBody = false;
 
 //consts
