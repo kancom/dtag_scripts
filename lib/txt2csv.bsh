@@ -145,7 +145,9 @@ String[][][] straHdrsPos = new String[][][]
     {"rtrv-homern", "    RN", "28"}
   },
   {//23
-    {"rtrv-mrn", "       MRNSET      PCN            RC", "18", "34"}
+    {"rtrv-mrn", "       MRNSET MAPSET  MAPPC          MAPSSN      PCN            RC WT %WT THR", "14", "22", "37", "47", "64", "67", "70", "74"},
+    {"rtrv-mrn", "       MRNSET MAPSET  MAPPCN         MAPSSN      PCN            RC WT %WT THR", "14", "22", "37", "47", "64", "67", "70", "74"},
+    {"rtrv-mrn", "       MRNSET MAPSET  MAPPC          MAPSSN NET  PC             RC WT %WT THR", "14", "22", "37", "44", "48", "64", "67", "70", "74"},
   },
   {//24
     {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     ANAME           SLKTPS/      MAXSLKTPS", "9", "14", "25", "29", "38", "54", "67"},
@@ -511,8 +513,10 @@ treat_rtrv_spc(String line)
   myprint("in treat_rtrv_spc", 1);
   String hdr = "    rtrv-spc                            ";
   addHeader(hdr);
-  addData(strCurHdr, line);
-  if (line.matches("^ +$")) {
+  if (line.matches(".*(SPC|[0-9a-z]-).*")) {
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^;$")) {
     String[][][] new_straHdrsPos = {{{"rtrv-spc", hdr, "4"}}};
     straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
   }
