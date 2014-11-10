@@ -94,7 +94,7 @@ awk --re-interval '
 }
 ' "${2}"
 
-awk '
+gawk --re-interval '
 BEGIN {body=0;}
 {
   if ($0 ~ /> rtrv-map/) {
@@ -112,11 +112,11 @@ BEGIN {body=0;}
     if ($0 ~ /Command/) {$0=""}
     if ($0==";") {
       body=0;
-    } else if ($0 ~ /^[a-z0-9]+/) {
+    } else if ($0 ~ /^[0-9]+[a-z]*/) {
       $0 = gensub(/ {8,}/, ",,", "g");
       $0 = gensub(/ +/, ",", "g");
       printf "%s,%s,%s,%s\n",$0,mapset,mrnset,mrnpc >> fname;
-    } else if ($0 ~ /^ +[a-z0-9]+/) {
+    } else if ($0 ~ /^ +[0-9]+[a-z]*/) {
       $0 = gensub(/ +/, ",", "g");
       printf "%s\n",$0 >> fname;
     }

@@ -8,7 +8,7 @@ String strCurCmd = "";
 String strCurHdr = "";
 Hashtable htHeaders;
 boolean bSPECIALCMD = false;
-int DEBUGLVL = 0;
+int DEBUGLVL = 3;
 boolean blIsCmdBody = false;
 
 //consts
@@ -150,6 +150,7 @@ String[][][] straHdrsPos = new String[][][]
     {"rtrv-mrn", "       MRNSET MAPSET  MAPPC          MAPSSN NET  PC             RC WT %WT THR", "14", "22", "37", "44", "48", "64", "67", "70", "74"},
   },
   {//24
+    {"rtrv-slk", "                                      L2T               PCR  PCR    E1   E1    ", "9"},
     {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     ANAME           SLKTPS/      MAXSLKTPS", "9", "14", "25", "29", "38", "54", "67"},
     {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     SET  BPS    ECM   N1   N2     LOC  PORT TS", "9", "14", "25", "29", "38", "43", "50", "56", "61", "68", "73", "78"}
   },
@@ -511,13 +512,13 @@ void
 treat_rtrv_spc(String line)
 {
   myprint("in treat_rtrv_spc", 1);
-  String hdr = "    rtrv-spc                            ";
+  String hdr = "SPC-N";
   addHeader(hdr);
-  if (line.matches(".*(SPC|[0-9a-z]-).*")) {
-    addData(strCurHdr, line);
+  if (line.matches(" +[0-9a-z\\-]+$")) {
+    addData(strCurHdr, line+"                ");
   }
   if (line.matches("^;$")) {
-    String[][][] new_straHdrsPos = {{{"rtrv-spc", hdr, "4"}}};
+    String[][][] new_straHdrsPos = {{{"rtrv-spc", hdr, "30"}}};
     straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
   }
 }
@@ -526,15 +527,15 @@ void
 treat_rtrv_feat(String line)
 {
   myprint("in treat_rtrv_feat", 1);
-  String hdr = "rtrv-feat                                                                    ";
+  String hdr = "    ITEM       VALUE   ITEM       VALUE   ITEM       VALUE";
   addHeader(hdr);
   String dlmt = "=";
   if (line.matches("^.*"+dlmt+".*$")) {
     line = replaceLineSeq(line, new String[] {dlmt, " "});
     addData(strCurHdr, line);
   }
-  if (line.matches("^ +$")) {
-    String[][][] new_straHdrsPos = {{{"rtrv-feat", hdr, "15", "23", "34", "43", "53"}}};
+  if (line.matches("^;$")) {
+    String[][][] new_straHdrsPos = {{{"rtrv-feat", hdr, "15", "23", "34", "42", "53"}}};
     straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
   }
 }
