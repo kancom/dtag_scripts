@@ -24,5 +24,5 @@ result = Cocoanut.sendBatchCmd(CMDs.BatchCmds, inBatchDelay) ? "sendBatchCmd Suc
 Cocoanut.logMsg(result);
 result = Cocoanut.saveOutput(SaveLogUnder) ? "saveOutput Succd" : "saveOutput Failed";
 Cocoanut.logMsg(result);
-Cocoanut.archiveOutput(SaveLogUnder);
+if (result) {Cocoanut.archiveOutput(SaveLogUnder)};
 Cocoanut.logMsg("Completed");

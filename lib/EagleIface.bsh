@@ -53,7 +53,7 @@ boolean saveOutput(String orgpath, boolean bDedDir)
   TmpFile = new File(SCRIPT + "sv.lock");
   if (TmpFile.exists()) {
       logMsg("saveOutput exists as lock file: "+TmpFile.getAbsolutePath() + "exists.");
-      return result;
+      return false;
   }
   TmpFile.createNewFile();
   logMsg("lock file: "+TmpFile.getAbsolutePath());

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 queue="e"; #_e_5-ms
-delay=7200; #seconds
+delay=60; #seconds
 severity=2; #MAJOR
 remote="osstrans@10.101.21.39:/data/osstrans/upload/TMLAB/Bonn/STP";
 arg1=$1; #on setup it's "setup"; on run it's $path
