@@ -26,18 +26,54 @@ String myexec(String[] proc)
 boolean sendBatchCmd(String[] CMDs, int pause)
 {
   boolean result = false;
+  int randomNum;
+  File TmpFile;
+  Random rand = new Random();
+  do {
+    randomNum = rand.nextInt(1000000000);
+    TmpFile = new File(SCRIPT + randomNum + "snd.lock");
+  } while (TmpFile.exists());
+  TmpFile.createNewFile();
+  logMsg("lock file: "+TmpFile.getAbsolutePath());
   int cmds = 0;
   for (int i=0; i<CMDs.length; i++) {
     if (sendCmd(CMDs[i], true)) { cmds++; }
     Thread.sleep(pause);
   }
   if (cmds>0) {result = true;}
+  TmpFile.delete();
   return result;
 }
 
 boolean saveOutput(String orgpath, boolean bDedDir)
 {
   boolean result = true;
+  int randomNum;
+  File TmpFile;
+  TmpFile = new File(SCRIPT + "sv.lock");
+  if (TmpFile.exists()) {
+      logMsg("saveOutput exists as lock file: "+TmpFile.getAbsolutePath() + "exists.");
+      return result;
+  }
+  TmpFile.createNewFile();
+  logMsg("lock file: "+TmpFile.getAbsolutePath());
+  File root = new File("./");
+  File[] list;
+  do {
+    boolean locksfound=false;
+    list = root.listFiles();
+    if (list != null) {
+      for ( File f : list ) {
+        if (f.toString().matches(".*"+SCRIPT+".*snd\\.lock")) {
+          locksfound = true;
+          while (f.exists()) {
+            Thread.sleep(60*1000);
+          }
+        }
+      }
+    }
+  } while (locksfound);
+
   String pttrn = ".*#(.*)\\.txt";
   Pattern pattern = Pattern.compile(pttrn);
   Matcher matcher;
@@ -69,6 +105,7 @@ boolean saveOutput(String orgpath, boolean bDedDir)
       }
     }
   }
+  TmpFile.delete();
   return result; 
 }
 
