@@ -8,7 +8,7 @@ String strCurCmd = "";
 String strCurHdr = "";
 Hashtable htHeaders;
 boolean bSPECIALCMD = false;
-int DEBUGLVL = 0;
+int DEBUGLVL = 3;
 boolean blIsCmdBody = false;
 
 //consts
@@ -18,7 +18,7 @@ String sOClDlRgEx = ",";//all "\" are replaced with "\\"
 String strWordRegExp = "([A-Za-z0-9/\\-\\*%]+ ?)+";//all "\" are replaced with "\\"
 String strColumnMinRepRegExp=" {2,}"; //all "\" are replaced with "\\"
 String strDataRegExp="^ *((([A-Za-z0-9:%\\*,\\._]|-) ?)+("+strColumnMinRepRegExp+"|$)){2,}"; //all "\" are replaced with "\\"
-String strCmdNameRegExp="^> *([a-z0-9\\-:=]+)$"; //all "\" are replaced with "\\"
+String strCmdNameRegExp="^> *([a-z0-9\\-:= ]+)$"; //all "\" are replaced with "\\"
 String strCmdOutBgnRegExp=".*Command Accepted.*"; //all "\" are replaced with "\\"
 String strCmdOutEndRegExp=".*(Command Executed|Command Completed).*"; //all "\" are replaced with "\\"
 
@@ -53,28 +53,21 @@ String[][] straMergedHdrs = new String[][] {
 "LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"N1"+sOClDlRgEx+"N2"+sOClDlRgEx+"LOC"+sOClDlRgEx+"PORT"+sOClDlRgEx+"TS",
 "LOC"+sOClDlRgEx+"LINK"+sOClDlRgEx+"LSN"+sOClDlRgEx+"SLC"+sOClDlRgEx+"TYPE"+sOClDlRgEx+"L2T SET"+sOClDlRgEx+"BPS"+sOClDlRgEx+"ECM"+sOClDlRgEx+"PCR N1"+sOClDlRgEx+"PCR N2"+sOClDlRgEx+"E1 LOC"+sOClDlRgEx+"E1 PORT"+sOClDlRgEx+"TS"},
 {"                                     L3T SLT              GWS GWS GWS",
-"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"SET"+sOClDlRgEx+"SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"ACT"+sOClDlRgEx+"MES"+sOClDlRgEx+"DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS",
-"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"},
-{"                                     L3T SLT              GWS GWS GWS",
 "LSN"+sOClDlRgEx+"APCI   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"SET"+sOClDlRgEx+"SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"ACT"+sOClDlRgEx+"MES"+sOClDlRgEx+"DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS",
-"LSN"+sOClDlRgEx+"APCI   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"}
+"LSN"+sOClDlRgEx+"APCI   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"},
+{"                                     L3T SLT              GWS GWS GWS",
+"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"SET"+sOClDlRgEx+"SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"ACT"+sOClDlRgEx+"MES"+sOClDlRgEx+"DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS",
+"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"}
 };
 
 
 String[][][] straHdrsPos = new String[][][] 
 {
-  {//0
+  {//1
     {"rept-stat-db", "            C   LEVEL    TIME LAST BACKUP     C   LEVEL    TIME LAST BACKUP", "13", "15", "24", "47", "49", "58"},
     {"rept-stat-db", "    CARD/APPL  LOC   C  T  LEVEL       TIME LAST UPDATE   EXCEPTION", "16", "22", "25", "28", "40", "59"},
     {"rept-stat-db", "                     C  BIRTHDATE          LEVEL       EXCEPTION", "22", "25", "44", "56"},
     {"rept-stat-db", "    CARD/APPL  LOC   C  BIRTHDATE          LEVEL       EXCEPTION    IN-SRVC", "16", "22", "25", "44", "56", "69"}
-  },
-  {//1
-    {"rept-stat-ls", "    LSN           APCA             PST           SST       AST", "17", "36", "50", "60"},
-    {"rept-stat-ls", "    LSN           APCN             PST           SST       AST", "17", "36", "50", "60"},
-    {"rept-stat-ls", "    LSN           APCN24           PST           SST       AST", "17", "36", "50", "60"},
-    {"rept-stat-ls", "    LSN           APCI             PST           SST       AST", "17", "36", "50", "60"},
-    {"rept-stat-ls", "    LSN           APCN16           PST           SST       AST", "17", "36", "50", "60"}
   },
   {//2
     {"rept-stat-mps", "                       VERSION       PST            SST        AST", "24", "38", "53", "64"},
@@ -150,19 +143,160 @@ String[][][] straHdrsPos = new String[][][]
     {"rtrv-mrn", "       MRNSET MAPSET  MAPPC          MAPSSN NET  PC             RC WT %WT THR", "14", "22", "37", "44", "48", "64", "67", "70", "74"},
   },
   {//24
+    {"rtrv-ip-host", "    LOCAL IPADDR     LOCAL HOST", "22"},
+    {"rtrv-ip-host", "    REMOTE IPADDR    REMOTE HOST", "22"}
+  },
+  {//25
+    {"rtrv-ctrl-feat", "    Feature Name              Partnum   Status Quantity", "31", "41", "48"}
+  },
+  {//26
+    {"rtrv-sid", "       PCA             PCI          PCN                CLLI              PCTYPE", "20", "35", "56", "73"}
+  },
+  {//27
+    {"rtrv-card:links=ipsg", "    CARD   TYPE      APPL     LSET NAME   LINK SLC   RSVDSLKTPS  MAXSLKTPS", "12", "22", "31", "43", "48", "54", "66"}
+  },
+   {//28
+    {"rtrv-gttsel", "    GTI                   CG                   CDPA             CGPA", "27", "48", "65"},
+    {"rtrv-gttsel", "    NAT  TT  NP      NAI  SSN SELID LSN        GTTSET           GTTSET", "10", "14", "22", "27", "31", "37", "48", "65"}
+  },
+  {//29
+     {"rtrv-gttset", "    GTTSN      NETDOM  SETTYPE  REFCNT   NDGT", "16", "24", "33", "42"}
+  },
+  {//30
+    {"rtrv-aiqopts", "    AIQ OPTIONS ", "15"}
+  },
+  {//31
+    {"rtrv-ainpopts", "    AINP OPTIONS ", "17"}
+  },
+  {//32
+    {"rtrv-dstn", "       DPCI          CLLI        BEI ELEI   ALIASA           ALIASN/N24    DMN", "22", "34", "38", "45", "62", "74"}
+  },
+  {//33
+    {"rtrv-feat", "    EAGLE FEATURE LIST ", "16"}
+  },
+  {//34
+    {"rtrv-gttact", "    ACTID      ACTION   ATCAPERR ITCAPERR UDTSERR UIMREQD", "16", "25", "36", "43", "51"}
+  },
+  {//35
+    //{"rtrv-gttaset", "    ACTSN      TEST  ActIds   ", "16", "22", "38", "45"},
+    {"rtrv-gttaset", "               MODE", "22", "28", "35"}
+  },
+  {//36
+    {"rtrv-ip-card", "    LOC", "17"}
+  },
+  {//37
+    {"rtrv-ip-lnk", "    LOC   PORT IPADDR          SUBMASK         DUPLEX  SPEED MACTYPE AUTO MCAST ", "11", "16", "32", "48", "56", "62", "70", "74"}
+  },
+  {//38
+    {"rtrv-ip-rte", "    LOC   DEST             SUBMASK          GTWY             ", "11", "28", "45"}
+  },
+  {//41
+    {"rtrv-measopts", "    PLATFORMENABLE ", "24"}
+  },
+  {//42
+    {"rtrv-mtc-measopts", "    MTCHLNP          ", "24"}
+  },
+  {//43
+    {"rtrv-na", "    TYPE    GC           NA", "13", "26"}
+  },
+  {//44
+    {"rtrv-rte", "       DPCI             ALIASA           ALIASN/N24    RTX   CLLI", "25", "42", "56", "62"}
+  },
+  {//45
+    {"rtrv-sccpopts", "    SCCP OPTIONS ", "26"}
+  },
+  {//46
+    {"rtrv-scr-aftpc", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//47
+    {"rtrv-scr-blkdpc", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//48
+    {"rtrv-scr-blkopc", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//49
+    {"rtrv-scr-cdpa", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//50
+    {"rtrv-scr-cgpa", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//51
+    {"rtrv-scr-destfld", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//52
+    {"rtrv-scr-dpc", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"},
+    {"rtrv-scr-dpc", "    SR      ZONE   AREA     ID       NSFI    NSR/ACT", "10", "19", "28", "37", "46"},
+    {"rtrv-scr-dpc", "    SR      NPC                      NSFI    NSR/ACT", "10", "37", "46"},
+    {"rtrv-scr-dpc", "    SR    MSA      SSA      SP       NSFI    NSR/ACT", "10", "19", "28", "37", "46"}
+  },
+  {//53
+    {"rtrv-scr-opc", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"},
+    {"rtrv-scr-opc", "    SR      NPC                      NSFI    NSR/ACT", "10", "37", "46"}
+  },
+  {//54
+    {"rtrv-scr-sio", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"},
+    {"rtrv-scr-sio", "    SR    NIC  PRI   SI  H0     H1     NSFI    NSR/ACT", "10", "15", "21", "25", "32", "39", "47"}
+  },
+  {//55
+    {"rtrv-scr-tt", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+    {//56
+    {"rtrv-scrset", "    SCRN  NSFI    NSR/ACT  FULL  RULES  TABLES  DESTFLD       ", "11", "19", "28", "34", "41", "49"}
+  },
+  {//58
+    {"rtrv-srvsel", "    GTII    TT   NP       NAI   SSN  SNP   SNAI   SERV   GTTRQD", "13", "18", "27", "33", "38", "44", "51", "58"},
+    {"rtrv-srvsel", "    DFLTACT", "12"}
+  },
+  {//59
+    {"rtrv-stp", "    Card  Part Number  Rev Serial Number  Type     DB     APPL     GPL Version", "11", "24", "28", "43", "52", "59", "68"}
+  },
+  {//60
+    {"rtrv-stpopts", "    STP OPTIONS ", "16"}
+  },
+  {//84
+    {"rtrv-scr-aftpc", "    SR      ZONE   AREA     ID       SSN      SCMGFID  NSFI    NSR/ACT", "10", "19", "28", "37", "46", "56", "63"}
+  },
+  {//85
+    {"rtrv-gsms-opcode", "    OPCODE  OPNAME     DFLTACT       PCA             SSN   MAPSET RI  TT", "13", "24", "38", "54", "60", "67", "71"}
+  },
+  {//86
+    {"rtrv-gsmssn-scrn", "    SSN       ORIG      DEST", "15", "25"}
+  },
+  {//87
+    {"rtrv-ftp-serv", "    APP       IPADDR           LOGIN            PRIO", "14", "31", "48"}
+  },
+  {//88
+    {"rtrv-tps", "    CARD     NUM    NUM      RSVD       MAX"},
+    {"rtrv-tps", "    TYPE   CARDS  LINKS       TPS       TPS", "12", "19", "28", "37"}
+  },
+  {//89
+    {"rtrv-loopset", "    LoopSet    Mode     Point Codes", "13", "24"}
+  },
+  {//90
+    {"rtrv-card", "    CARD   TYPE      APPL     LSET NAME   LINK SLC LSET NAME   LINK SLC", "12", "22", "31", "43", "48", "52", "64", "69"}
+  },
+  {//91
     {"rtrv-slk", "                                      L2T               PCR  PCR    E1   E1    ", "9"},
     {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     ANAME           SLKTPS/      MAXSLKTPS", "9", "14", "25", "29", "38", "54", "67"},
     {"rtrv-slk", "    LOC  LINK LSN        SLC TYPE     SET  BPS    ECM   N1   N2     LOC  PORT TS", "9", "14", "25", "29", "38", "43", "50", "56", "61", "68", "73", "78"}
   },
-  {//25
+  {//92
     {"rtrv-ls", "                                     L3T SLT              GWS GWS GWS", "16"}, /*fake header*/
     {"rtrv-ls", "    LSN           APCI   (SS7)  SCRN SET SET BEI LST LNKS ACT MES DIS SLSCI NIS", "16", "32", "37", "41", "45", "49", "53", "58", "62", "66", "70", "76"},
     {"rtrv-ls", "    LSN           APCN   (SS7)  SCRN SET SET BEI LST LNKS ACT MES DIS SLSCI NIS", "16", "32", "37", "41", "45", "49", "53", "58", "62", "66", "70", "76"}
+  },
+  {//93
+    {"rept-stat-ls", "    LSN           APCA             PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCN             PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCN24           PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCI             PST           SST       AST", "17", "36", "50", "60"},
+    {"rept-stat-ls", "    LSN           APCN16           PST           SST       AST", "17", "36", "50", "60"}
   }
 };
 
 String strSpecialCmds = "rtrv-gttaset|rtrv-gsmopts|rtrv-meas-sched|rtrv-sccp-serv|rtrv-serial-num|rtrv-sg-opts|rtrv-tbl-capacity|"
-                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn|rtrv-gta|rtrv-map";
+                      + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn|"
+                      + "rtrv-gta|rtrv-map|rept-stat-ls";
 
 Boolean bToCSV = true;
 
@@ -228,6 +362,7 @@ String checkMergeHdr(String strNewHdr)
 boolean findHdr(String strLine, int[] ioutNb)
 {
   myprint("in findHdr", 1);
+  myprint("findHdr: "+strLine, 3);
   for (int i=0; i<straHdrsPos.length; i++) {
     for (int j=0; j<straHdrsPos[i].length; j++) {
       myprint("findHdr:"+i+","+j+",0:"+straHdrsPos[i][j][0]+"::"+straHdrsPos[i][j][1], 4);
@@ -598,6 +733,47 @@ treat_rtrv_dstn(String line)
 }
 
 
+String pttrn = "^ *([a-z0-9]+).*$";
+Pattern pattern = Pattern.compile(pttrn);
+Matcher matcher;
+String lnk;
+
+void
+treat_rept_stat_ls(String line)
+{
+  myprint("in treat_rept_stat_ls", 1);
+  if        (line.matches("^.*LSN           APCA.*$")) {
+    addHeader("    LSN           APCA             PST           SST       AST");
+  } else if (line.matches("^.*LSN           APCN.*$")) {
+    addHeader("    LSN           APCN             PST           SST       AST");
+  } else if (line.matches("^.*LSN           APCN24.*$")) {
+    addHeader("    LSN           APCN24           PST           SST       AST");
+  } else if (line.matches("^.*LSN           APCI.*$")) {
+    addHeader("    LSN           APCI             PST           SST       AST");
+  } else if (line.matches("^.*LSN           APCN16.*$")) {
+    addHeader("    LSN           APCN16           PST           SST       AST");
+  }
+  if (line.matches("^.*-[A-Z].*$")) {
+    addData(strCurHdr, line);
+    matcher = pattern.matcher(line);
+    if (matcher.find()) {
+      lnk = "rtrv-ls:lsn=" + matcher.group(1);
+      SendCommand(lnk);
+    }
+  }
+  if (line.matches(".*Command.*")) {
+    String[][][] new_straHdrsPos = {{
+      {"rept-stat-ls", "    LSN           APCA             PST           SST       AST", "17", "36", "50", "60"},
+      {"rept-stat-ls", "    LSN           APCN             PST           SST       AST", "17", "36", "50", "60"},
+      {"rept-stat-ls", "    LSN           APCN24           PST           SST       AST", "17", "36", "50", "60"},
+      {"rept-stat-ls", "    LSN           APCI             PST           SST       AST", "17", "36", "50", "60"},
+      {"rept-stat-ls", "    LSN           APCN16           PST           SST       AST", "17", "36", "50", "60"}
+    }};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+
 void
 treatSpclCmd(String line)
 {
@@ -647,6 +823,9 @@ treatSpclCmd(String line)
       break;
     case "rtrv-dstn":
       treat_rtrv_dstn(line);
+      break;
+    case "rept-stat-ls":
+      treat_rept_stat_ls(line);
       break;
   }
 }

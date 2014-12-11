@@ -52,15 +52,16 @@ boolean saveOutput(String orgpath, boolean bDedDir)
   File TmpFile;
   TmpFile = new File(SCRIPT + "sv.lock");
   if (TmpFile.exists()) {
-      logMsg("saveOutput exists as lock file: "+TmpFile.getAbsolutePath() + "exists.");
+      logMsg("saveOutput exits as lock file: "+TmpFile.getAbsolutePath() + " exists.");
       return false;
   }
   TmpFile.createNewFile();
   logMsg("lock file: "+TmpFile.getAbsolutePath());
   File root = new File("./");
   File[] list;
+  boolean locksfound;
   do {
-    boolean locksfound=false;
+    locksfound=false;
     list = root.listFiles();
     if (list != null) {
       for ( File f : list ) {
@@ -98,7 +99,7 @@ boolean saveOutput(String orgpath, boolean bDedDir)
           logMsg(f.toString()+" file moved to "+path);
           converter = txt2csv();
           logMsg("Converting "+path + f.getName());
-          logMsg("*.csv put under "+converter.convert(path + f.getName()));
+          logMsg("*.csv put in "+converter.convert(path + f.getName()));
           logMsg("Multiline cmds..");
           myexec(new String[] {WD+"/lib/txt2csv_ml.bash", path, f.getName()});
         }

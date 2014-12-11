@@ -4,6 +4,7 @@ cd $1;
 
 dos2unix "$2"
 
+LANG=C
 awk --re-interval '
 {
   if ($0 ~ /> rtrv-gta/) {
@@ -119,6 +120,132 @@ BEGIN {body=0;}
     } else if ($0 ~ /^ +[0-9]+[a-z]*/) {
       $0 = gensub(/ +/, ",", "g");
       printf "%s\n",$0 >> fname;
+    }
+  }
+}
+' "${2}"
+
+gawk --re-interval '
+BEGIN {body=0;}
+{
+  fname = "rtrv-assoc.csv";
+  if ($0 ~ /> rtrv-assoc/) {
+    print "ANAME,LOC,IPLNK,LINK,ADAPTER,VER,LHOST,ALHOST,RHOST,ARHOST,LPORT,RPORT,ISTRMS,OSTRMS,BUFSIZE,RMODE,RMIN,RMAX,RTIMES,CWMIN,UAPS,OPEN,ALW,RTXTHR,RHOSTVAL,M2PATSET" > fname;
+    cmd=1;
+  }
+  if ((cmd) &&($0 ~ / +ANAME.*/)) {
+    body=1;
+    fst = substr($0, 11);
+    fst = gensub(/^ +| +$/, "", "g", fst);
+    printf "\n%s,", fst >> fname;
+  } else if (body) {
+    if ($0 ~ /Command/) {$0=""}
+    if ($0==";") {
+      body=0;
+      cmd=0;
+    } else if ($0 ~ /          [A-Z]+.*/) {
+      fst = substr($0, 20, 14);
+      fst = gensub(/^ +| +$/, "", "g", fst);
+      printf "%s,", fst >> fname;
+      if (length($0)>45) {
+        scd = substr($0, 45, 12);
+        scd = gensub(/^ +| +$/, "", "g", scd);
+        scd = gensub(/,/, ".", "g", scd);
+        printf "%s,", scd >> fname;
+      }
+      if (length($0)>66) {
+        thd = substr($0, 66);
+        thd = gensub(/^ +| +$/, "", "g", thd);
+        printf "%s,", thd >> fname;
+      }
+    }
+  }
+}
+' "${2}"
+
+gawk --re-interval '
+function rewind(i)
+{
+    for (i = ARGC; i > ARGIND; i--)
+        ARGV[i] = ARGV[i-1]
+    ARGC++
+    ARGV[ARGIND+1] = FILENAME
+    nextfile
+}
+BEGIN {
+  body=0;
+  cnt=1;
+  fname = "rtrv-ls:lsn.csv";
+  printhdr = 1;
+}
+{
+  if ($0 ~ /rtrv-ls:lsn=/) {body=1;}
+  if ($0 ~ /Command Executed/) {body=0;}
+  if ($0 ~ /Script execution completed/) { # rewind to the beginning of file for 2nd pass
+    pass++;
+    if (pass==1) {
+      rewind(1);
+    }
+  }
+  if (body==0) {next;}
+  if (pass!=1) { #first passs - only reading all headers
+    if ($0 ~ /^ +[A-Z]{3,}.*$/) { #header line
+      cls = split($0, hdrs);
+      for (i=1; i<=cls; i++) {
+        if ((hdrs[i] ~ /^[A-Z0-9]+$/) && (!HEADERS[hdrs[i]])) {
+          HEADERS[hdrs[i]] = 1;
+          HEADERS_R[cnt] = hdrs[i];
+          cnt++;
+        }
+      }
+    }
+  } else { #second pass - reading data
+    if (printhdr) {
+      for (i=1; i<cnt; i++) {
+        printf "%s,", HEADERS_R[i] > fname;
+      }
+      printf "\n" >> fname;
+      printhdr = 0;
+    } else {
+      if ($0 ~ /^ +[A-Z]{3,}.*$/) { #header line
+        prevhdr=$0;
+        prevhdr = gensub(/\(SS7\)/, "     ", "g", prevhdr);
+      } else { #data line
+        if ($0 ~ /^ +$/) {
+          prevhdr="";
+        }
+        cls = split(prevhdr, hdrs);
+        for (i=1; i<cls; i++) {
+          if (hdrs[i] ~ /^[A-Z0-9]+$/) {
+            if (hdrs[i] == "LSN") {
+              for (hdr in HEADERS) {
+                HEADERS[hdr] = "";
+              }
+            }
+            pos_s = index(prevhdr, hdrs[i]);
+            pos_e = index(prevhdr, hdrs[i+1]);
+            data = substr($0, pos_s, pos_e - pos_s);
+            data = gensub(/^ +| +$/, "", "g", data);
+            data = gensub(/,/, ".", "g", data);
+            if ((hdrs[i] == "LOC") && (length(data)>10)) {
+              data = substr(data, 1, index(data, " "));
+            }
+            HEADERS[hdrs[i]] = data;
+          }
+        }
+        if (prevhdr!="") {
+          pos_s = index(prevhdr, hdrs[cls]);
+          data = substr($0, pos_s);
+          data = gensub(/^ +| +$/, "", "g", data);
+          HEADERS[hdrs[cls]] = data;
+          if (hdrs[cls] ~ /ANAME|TS/) {
+            for (i=1; i<cnt; i++) {
+              printf "%s,", HEADERS[HEADERS_R[i]] >> fname;
+            }
+            printf "\n" >> fname;
+          }
+        }
+      }
     }
   }
 }
