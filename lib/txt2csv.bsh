@@ -167,7 +167,8 @@ String[][][] straHdrsPos = new String[][][]
      {"rtrv-gttset", "    GTTSN      NETDOM  SETTYPE  REFCNT   NDGT", "16", "24", "33", "42"}
   },
   {//30
-    {"rtrv-aiqopts", "    AIQ OPTIONS ", "15"}
+    {"rtrv-aiqopts", "    AIQ OPTIONS ", "15"},
+    {"rtrv-aiqopts", "    TRIGTYPE     PFX", "18"}
   },
   {//31
     {"rtrv-ainpopts", "    AINP OPTIONS ", "17"}
@@ -300,7 +301,7 @@ String[][][] straHdrsPos = new String[][][]
 
 String strSpecialCmds = "rtrv-gttaset|rtrv-gsmopts|rtrv-meas-sched|rtrv-sccp-serv|rtrv-serial-num|rtrv-sg-opts|rtrv-tbl-capacity|"
                       + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn|"
-                      + "rtrv-gta|rtrv-map|rept-stat-ls|rtrv-card";
+                      + "rtrv-gta|rtrv-map|rept-stat-ls|rtrv-card|rtrv-aiqopts";
 
 Boolean bToCSV = true;
 
@@ -479,22 +480,25 @@ treat_rtrv_gsmopts(String line)
 {
   myprint("in treat_rtrv_gsmopts", 1);
   if (line.matches("^.*GSM OPTIONS.*$")) {
-    addHeader("GSM OPTIONS                                                            ");
+    addHeader("    ITEM1              VALUE1          ITEM2              VALUE2");
+  }
+  if (line.matches("^.*GFLEXMAPLAYERRTG.*$")) {
+    line = replaceLineSeq(line, new String[] {"     ", ""});
   }
   if (line.matches("^.*=.*$")) {
     line = replaceLineSeq(line, new String[] {"=", " "});
     addData(strCurHdr, line);
   }
   if (line.matches("^.*G-Flex.*$")) {
-      addHeader("G-Flex MLR OPTIONS                                                   ");
+      addHeader("    ITEM1          VALUE1 ITEM2       VALUE2 ITEM3       VALUE3");
   }
   if (line.matches("^;$")) {
     String[][][] new_straHdrsPos = {{{"rtrv-gsmopts", 
-                                      "GSM OPTIONS                                                            ", 
-                                      "21", "39", "56"},
+                                      "    ITEM1              VALUE1          ITEM2              VALUE2", 
+                                      "21", "39", "59"},
                                      {"rtrv-gsmopts", 
-                                      "G-Flex MLR OPTIONS                                                   ", 
-                                      "21", "26", "39", "44", "58"}}};
+                                      "    ITEM1          VALUE1 ITEM2       VALUE2 ITEM3       VALUE3", 
+                                      "20", "27", "39", "46", "58"}}};
     straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
   }
 }
@@ -798,6 +802,29 @@ treat_rtrv_card(String line)
   }
 }
 
+void
+treat_rtrv_aiqopts(String line)
+{
+  myprint("in treat_rtrv_aiqopts", 1);
+  if (line.matches("    AIQ OPTIONS $")) {
+    addHeader("     OPTION     VALUE");
+  } else if (line.matches("    TRIGTYPE     PFX")) {
+    addHeader("    TRIGTYPE     PFX");
+  }
+  String dlmt = "=";
+  if (line.matches("^.*"+dlmt+".*$")) {
+    line = replaceLineSeq(line, new String[] {dlmt, " "});
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^;$")) {
+    String[][][] new_straHdrsPos = {{
+      {"rtrv-aiqopts", "     OPTION     VALUE", "15"},
+      {"rtrv-aiqopts", "    TRIGTYPE     PFX", "18"}
+    }};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
 
 void
 treatSpclCmd(String line)
@@ -854,6 +881,9 @@ treatSpclCmd(String line)
       break;
     case "rtrv-card":
       treat_rtrv_card(line);
+      break;
+    case "rtrv-aiqopts":
+      treat_rtrv_aiqopts(line);
       break;
   }
 }
