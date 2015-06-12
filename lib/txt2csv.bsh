@@ -578,15 +578,15 @@ void
 treat_rtrv_tbl_capacity(String line)
 {
   myprint("in treat_rtrv_tbl_capacity", 1);
-  String hdr = "rtrv_tbl_capacity                                                                    ";
+  String hdr = "    TABLE_NAME         CURRENT_USE  MAX_USE   OCCUPANCY_RATE%";
   addHeader(hdr);
-  String dlmt = " of ";
-  if (line.matches("^.*"+dlmt+".*$")) {
-    line = replaceLineSeq(line, new String[] {dlmt, "/", "[()]", " "});
+  String dlmt = "[^0-9A-Z]";
+  if (line.matches("^.*table is.*$")) {
+    line = replaceLineSeq(line, new String[] {dlmt, " "});
     addData(strCurHdr, line);
   }
   if (line.matches("^;$")) {
-    String[][][] new_straHdrsPos = {{{"rtrv-tbl-capacity", hdr, "13", "24", "33", "35", "44"}}};
+    String[][][] new_straHdrsPos = {{{"rtrv-tbl-capacity", hdr, "24", "37", "47"}}};
     straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
   }
 }
