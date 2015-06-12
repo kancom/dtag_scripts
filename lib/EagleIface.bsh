@@ -98,10 +98,16 @@ boolean saveOutput(String orgpath, boolean bDedDir)
         if (result) {
           logMsg(f.toString()+" file moved to "+path);
           converter = txt2csv();
+          File rtrv_ls = new File( WD+"/lib/rtrv_ls.bsh" );
+          if (rtrv_ls.exists()) {
+            rtrv_ls.delete();
+            logMsg("pld rtrv-ls cmds deleted.");
+          }
           logMsg("Converting "+path + f.getName());
-          logMsg("*.csv put in "+converter.convert(path + f.getName()));
-          logMsg("Multiline cmds..");
+          converter.convert(path + f.getName(), WD);
+          logMsg("Normal commands complete");
           myexec(new String[] {WD+"/lib/txt2csv_ml.bash", path, f.getName()});
+          logMsg("Multiline commands complete");
         }
       }
     }

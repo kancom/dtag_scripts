@@ -181,7 +181,7 @@ BEGIN {
 {
   if ($0 ~ /rtrv-ls:lsn=/) {body=1;}
   if ($0 ~ /Command Executed/) {body=0;}
-  if ($0 ~ /Script execution completed/) { # rewind to the beginning of file for 2nd pass
+  if ($0 ~ /> last line/) { # rewind to the beginning of file for 2nd pass
     pass++;
     if (pass==1) {
       rewind(1);
@@ -239,6 +239,14 @@ BEGIN {
           data = gensub(/^ +| +$/, "", "g", data);
           HEADERS[hdrs[cls]] = data;
           if (hdrs[cls] ~ /ANAME|TS/) {
+            if (HEADERS["LSN"] ~ "s-") {
+              HEADERS["LSN"] = gensub(/ +s-$/, "", "g", HEADERS["LSN"]);
+              if (HEADERS["APCN"] != "") {
+                HEADERS["APCN"] = "s-" HEADERS["APCN"];
+              } else if (HEADERS["APCI"] != "") {
+                HEADERS["APCI"] = "s-" HEADERS["APCI"];
+              }
+            }
             for (i=1; i<cnt; i++) {
               printf "%s,", HEADERS[HEADERS_R[i]] >> fname;
             }

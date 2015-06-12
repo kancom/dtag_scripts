@@ -25,6 +25,7 @@ function run()
 {
   cd $arg1;
   fname="$(date +%Y%m%d_%H%M).tgz";
+  find ./ -name "rtrv-ls:lsn=*" -delete
   find ./ -name '*.csv' | tar -czf $fname -T -
   if ! sftp $fname $remote && rm -f $fname;
   then
