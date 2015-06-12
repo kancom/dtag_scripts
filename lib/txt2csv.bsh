@@ -180,7 +180,11 @@ String[][][] straHdrsPos = new String[][][]
     {"rtrv-feat", "    EAGLE FEATURE LIST ", "16"}
   },
   {//34
-    {"rtrv-gttact", "    ACTID      ACTION   ATCAPERR ITCAPERR UDTSERR UIMREQD", "16", "25", "36", "43", "51"}
+    {"rtrv-gttact", "    ACTID      ACTION   ATCAPERR ITCAPERR UDTSERR UIMREQD", "16", "25", "34", "43", "51"},
+    {"rtrv-gttact", "    ACTID      ACTION   PCA           RI  SSN  MRNSET  MAPSET", "16", "25", "39", "43", "48", "56"},
+    {"rtrv-gttact", "    ACTID      ACTION   PCI           RI  SSN  MRNSET  MAPSET", "16", "25", "39", "43", "48", "56"},
+    {"rtrv-gttact", "    ACTID      ACTION   PCN           RI  SSN  MRNSET  MAPSET", "16", "25", "39", "43", "48", "56"},
+    {"rtrv-gttact", "    ACTID      ACTION   PCN24         RI  SSN  MRNSET  MAPSET", "16", "25", "39", "43", "48", "56"}
   },
   {//35
     //{"rtrv-gttaset", "    ACTSN      TEST  ActIds   ", "16", "22", "38", "45"},
