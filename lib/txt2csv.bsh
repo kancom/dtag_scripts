@@ -8,8 +8,9 @@ String strCurCmd = "";
 String strCurHdr = "";
 Hashtable htHeaders;
 boolean bSPECIALCMD = false;
-int DEBUGLVL = 3;
+int DEBUGLVL = 2;
 boolean blIsCmdBody = false;
+String WD;
 
 //consts
 boolean bDataVerify = false;
@@ -296,7 +297,7 @@ String[][][] straHdrsPos = new String[][][]
 
 String strSpecialCmds = "rtrv-gttaset|rtrv-gsmopts|rtrv-meas-sched|rtrv-sccp-serv|rtrv-serial-num|rtrv-sg-opts|rtrv-tbl-capacity|"
                       + "rtrv-th-alm|rtrv-ip-card|rtrv-measopts|rtrv-mtc-measopts|rtrv-spc|rtrv-feat|rtrv-gttsel|rtrv-dstn|"
-                      + "rtrv-gta|rtrv-map|rept-stat-ls";
+                      + "rtrv-gta|rtrv-map|rept-stat-ls|rtrv-card";
 
 Boolean bToCSV = true;
 
@@ -737,6 +738,7 @@ String pttrn = "^ *([a-z0-9]+).*$";
 Pattern pattern = Pattern.compile(pttrn);
 Matcher matcher;
 String lnk;
+Hashtable htRtrv_ls_cmds;
 
 void
 treat_rept_stat_ls(String line)
@@ -758,7 +760,9 @@ treat_rept_stat_ls(String line)
     matcher = pattern.matcher(line);
     if (matcher.find()) {
       lnk = "rtrv-ls:lsn=" + matcher.group(1);
-      SendCommand(lnk);
+      if (! htRtrv_ls_cmds.containsKey(lnk)) {
+        htRtrv_ls_cmds.put(lnk, lnk);
+      }
     }
   }
   if (line.matches(".*Command.*")) {
@@ -768,6 +772,24 @@ treat_rept_stat_ls(String line)
       {"rept-stat-ls", "    LSN           APCN24           PST           SST       AST", "17", "36", "50", "60"},
       {"rept-stat-ls", "    LSN           APCI             PST           SST       AST", "17", "36", "50", "60"},
       {"rept-stat-ls", "    LSN           APCN16           PST           SST       AST", "17", "36", "50", "60"}
+    }};
+    straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
+  }
+}
+
+void
+treat_rtrv_card(String line)
+{
+  myprint("in treat_rtrv_card", 1);
+  if (line.matches("^    CARD   TYPE      APPL     LSET NAME   LINK SLC LSET NAME   LINK SLC$")) {
+    addHeader("    CARD   TYPE      APPL     LSET NAME1 LNK1 SLC1 LSET NAME2 LNK2 SLC2");
+  }
+  if (line.matches(".*[0-9].*")) {
+    addData(strCurHdr, line);
+  }
+  if (line.matches("^;$")) {
+    String[][][] new_straHdrsPos = {{
+      {"rtrv-card", "    CARD   TYPE      APPL     LSET NAME1 LNK1 SLC1 LSET NAME2 LNK2 SLC2", "12", "22", "31", "42", "47", "52", "63", "68"}
     }};
     straHdrsPos = concatArrs(straHdrsPos, new_straHdrsPos);
   }
@@ -827,6 +849,9 @@ treatSpclCmd(String line)
     case "rept-stat-ls":
       treat_rept_stat_ls(line);
       break;
+    case "rtrv-card":
+      treat_rtrv_card(line);
+      break;
   }
 }
 
@@ -873,11 +898,28 @@ void emitResult(String path)
       csvfile = null;
     }
   }
+  if (htRtrv_ls_cmds.size()>0) {
+    BufferedWriter rtrv_ls;
+    rtrv_ls = new BufferedWriter(new FileWriter(WD+"/lib/rtrv_ls.bsh"));
+    rtrv_ls.write("rtrv_ls() {\n");
+    rtrv_ls.write("  String[] BatchCmds = {\n");
+    Iterator itHdrs = htRtrv_ls_cmds.entrySet().iterator();
+    while (itHdrs.hasNext()) {
+      htEntry = itHdrs.next();
+      lnk = htEntry.getValue();
+      rtrv_ls.write("  \""+lnk + "\",\n");
+    }
+    rtrv_ls.write("  \"last line\"\n");
+    rtrv_ls.write("};\n  return this;\n}");
+    rtrv_ls.close();
+  }
 }
 
 //main
-String convert(String strFileName)
+String convert(String strFileName, String WD_)
 {
+WD = WD_;
+htRtrv_ls_cmds = new Hashtable();
 StringBuffer allCmdsText = readFullOutput(strFileName);
 String strResultPath = strFileName.substring(0, strFileName.lastIndexOf(File.separator))+File.separator;
 String[] straAllLines = allCmdsText.toString().split(System.getProperty("line.separator"));
