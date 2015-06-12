@@ -58,7 +58,10 @@ String[][] straMergedHdrs = new String[][] {
 "LSN"+sOClDlRgEx+"APCI   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"},
 {"                                     L3T SLT              GWS GWS GWS",
 "LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"SET"+sOClDlRgEx+"SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"ACT"+sOClDlRgEx+"MES"+sOClDlRgEx+"DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS",
-"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"}
+"LSN"+sOClDlRgEx+"APCN   (SS7)"+sOClDlRgEx+"SCRN"+sOClDlRgEx+"L3T SET"+sOClDlRgEx+"SLT SET"+sOClDlRgEx+"BEI"+sOClDlRgEx+"LST"+sOClDlRgEx+"LNKS"+sOClDlRgEx+"GWS ACT"+sOClDlRgEx+"GWS MES"+sOClDlRgEx+"GWS DIS"+sOClDlRgEx+"SLSCI"+sOClDlRgEx+"NIS"},
+{"    CARD     NUM    NUM      RSVD       MAX",
+"TYPE"+sOClDlRgEx+"CARDS"+sOClDlRgEx+"LINKS"+sOClDlRgEx+"TPS"+sOClDlRgEx+"TPS",
+"CARD TYPE"+sOClDlRgEx+"NUM CARDS"+sOClDlRgEx+"NUM LINKS"+sOClDlRgEx+"RSVD TPS"+sOClDlRgEx+"MAX TPS"}
 };
 
 
