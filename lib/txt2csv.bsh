@@ -663,7 +663,7 @@ void
 treat_rtrv_feat(String line)
 {
   myprint("in treat_rtrv_feat", 1);
-  String hdr = "    ITEM       VALUE   ITEM       VALUE   ITEM       VALUE";
+  String hdr = "    ITEM1      VALUE1  ITEM2      VALUE2  ITEM3      VALUE3";
   addHeader(hdr);
   String dlmt = "=";
   if (line.matches("^.*"+dlmt+".*$")) {
